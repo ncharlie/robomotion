@@ -1,0 +1,8 @@
+# Logs
+logs
+*.log
+*.log.*
+
+# env
+*.env
+config.yaml
