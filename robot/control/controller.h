@@ -3,7 +3,6 @@
 #include <avr/io.h>
 
 #include "din.h"
-#include "timer.h"
 
 #define DEBOUNCE_DELAY 200UL
 
@@ -24,11 +23,11 @@ class Controller {
         reading = reading >> 5;
 
         if (reading != lastReading) {
-            lastReadingTime = cMilli();  // keep timestamp
+            lastReadingTime = millis();  // keep timestamp
         }
         lastReading = reading;
 
-        if (cMilli() - lastReadingTime > DEBOUNCE_DELAY) {
+        if (millis() - lastReadingTime > DEBOUNCE_DELAY) {
             value = reading;  // most likely not a debounce,
         }
         return value;

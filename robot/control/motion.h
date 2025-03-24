@@ -3,10 +3,12 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <binary.h>
+#include <limits.h>
 
 #define MAX_SPEED 256
 
 enum Direction {
+    STOP = B00000000,
     FORWARD = 0B01100110,
     RIGHT = B10100101,
     BACKWARD = ~FORWARD,
@@ -20,7 +22,7 @@ enum Direction {
 class Motion {
    public:
     volatile unsigned long frSpd = 0;  // 64 * 12 = 768 per 1 round (314 mm)
-    volatile unsigned long rrSpd = 0;
+    volatile unsigned long frLast = 0;
 
    public:
     Motion() {
@@ -77,7 +79,19 @@ class Motion {
 
 Motion rover;
 ISR(INT0_vect) {
-    rover.frSpd++;
+    unsigned long now = micros();
+    unsigned long elapsed;
+    if (now > rover.frLast)
+        elapsed = now - rover.frLast;
+    else
+        elapsed = now + (ULONG_MAX - rover.frLast);
+
+    if (elapsed > 1000000)
+        rover.frSpd = 0;
+    else
+        rover.frSpd = 78125 / elapsed;
+
+    rover.frLast = now;
 }
 
 #endif /* _MOTION_CONTROL_H_ */
