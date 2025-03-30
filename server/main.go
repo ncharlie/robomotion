@@ -8,6 +8,9 @@ import (
 	"os"
 	"os/signal"
 	"robomotion/env"
+	"robomotion/repositories"
+	"robomotion/services"
+	"robomotion/utils"
 	"syscall"
 	"time"
 
@@ -20,7 +23,18 @@ func main() {
 	defer slog.Info("Done cleaning up")
 	slog.Info("starting...")
 
-	// dbConn := utils.NewMongoConnection(env.Get("mongodb.connection"))
+	dbConn := utils.NewMongoConnection(env.Get("mongodb.connection"))
+	defer utils.DisconnectMongo(dbConn)
+	mqttConn := utils.NewMqttClient(
+		env.Get("mqtt.url"),
+		env.Get("mqtt.username"),
+		env.Get("mqtt.password"),
+		env.Get("mqtt.client_id"),
+	)
+	defer utils.DisconnectMqtt(mqttConn)
+
+	_ = repositories.NewLogRepository(dbConn)
+	_ = services.NewMqttService(nil, mqttConn)
 
 	r := mux.NewRouter()
 	// r.HandleFunc("/search/{searchTerm}", Search)
@@ -28,9 +42,12 @@ func main() {
 	r.PathPrefix("/static/").Handler(static)
 
 	server := &http.Server{
-		Addr:        ":" + env.Get("app.port"),
-		ReadTimeout: 15 * time.Second,
-		Handler:     r,
+		Addr:    "0.0.0.0:" + env.Get("app.port"),
+		Handler: r,
+
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: time.Second * 15,
+		IdleTimeout:  time.Second * 60,
 	}
 
 	exit := make(chan os.Signal, 1)
@@ -48,14 +65,12 @@ func main() {
 		}
 	}()
 
-	slog.Info("Robomotion server is running")
-
-	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+	slog.Info("start listening http1 on 0.0.0.0:" + env.Get("app.port"))
+	if err := server.ListenAndServeTLS(env.Get("tls.cert"), env.Get("tls.key")); err != nil && err != http.ErrServerClosed {
 		slog.Error("Error starting server", "error", err)
 		log.Fatal(err)
 	}
 
 	slog.Info("Robomotion server has stopped")
 	slog.Info("Running cleanup tasks...")
-	// utils.DisconnectMongo(dbConn)
 }

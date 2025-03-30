@@ -9,26 +9,33 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const MongoClientTimeout = 5
+func ptr[T any](value T) *T {
+	return &value
+}
 
 func NewMongoConnection(conn string) *mongo.Client {
-	ctx, cancelFunc := context.WithTimeout(context.Background(), MongoClientTimeout*time.Second)
+	ctx, cancelFunc := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancelFunc()
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(conn))
+	option := options.ClientOptions{
+		MinPoolSize:     ptr[uint64](50),
+		MaxPoolSize:     ptr[uint64](3000),
+		MaxConnecting:   ptr[uint64](150),
+		ConnectTimeout:  ptr(10 * time.Second),
+		MaxConnIdleTime: ptr(1 * time.Second),
+	}
 
+	option.ApplyURI(conn)
+	client, err := mongo.Connect(ctx, &option)
 	if err != nil {
 		panic(err)
 	}
 
-	// defer func() {
-	// 	if err := client.Disconnect(context.TODO()); err != nil {
-	// 		panic(err)
-	// 	}
-	// }()
+	if err := client.Ping(ctx, nil); err != nil {
+		panic("Cannot connect to MongoDB: " + err.Error())
+	}
 
 	slog.Info("Connected to Mongo")
-
 	return client
 }
 
