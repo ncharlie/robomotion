@@ -1,0 +1,27 @@
+# Git
+.gitignore
+.git/
+README.md
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose.yml
+
+# scripts
+deploy.sh
+mongo.sh
+
+# Logs
+logs
+*.log
+*.log.*
+
+# env
+config.yaml
+
+# keys
+tls/
+
+# static
+static/

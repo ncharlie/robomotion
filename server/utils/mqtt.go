@@ -19,6 +19,8 @@ func NewMqttClient(brokerUrl, username, password, clientId string) mqtt.Client {
 	opts.SetAutoReconnect(true)
 	opts.SetMaxReconnectInterval(1 * time.Second)
 
+	opts.SetResumeSubs(true)
+
 	opts.SetOnConnectHandler(func(client mqtt.Client) {
 		slog.Info("Connected to MQTT broker")
 	})

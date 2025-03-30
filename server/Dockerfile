@@ -22,13 +22,11 @@ WORKDIR /app
 COPY --from=builder /etc/ssl/cert.pem /etc/ssl/cert.pem
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=builder /go/bin/robomotion ./
-COPY config.yaml ./
 
 # set timezone ----------------------------------------------------
 ARG TZ='Asia/Bangkok'
 
-EXPOSE 3000
-EXPOSE 3001/udp
+EXPOSE 8443
 ENTRYPOINT ["./robomotion"]
 
 # CMD ["test"]

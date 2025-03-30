@@ -20,9 +20,11 @@ sudo docker create --name $CONTAINER_NAME \
     --network=$DOCKER_NETWORK \
     --restart=always \
     --log-opt max-size=1g --log-opt max-file=3 \
-    -v $PWD/tls:/app/tls:ro \
+    -v ~/config.yaml:/app/config.yaml:ro \
+    -v ~/tls:/app/tls:ro \
+    -v $PWD/static:/app/static:ro \
     -p 443:8443 \
-    -d $IMAGE_NAME:$TAG "$1"
+    $IMAGE_NAME:$TAG "$1"
 
 # RUN the container
 sudo docker start $CONTAINER_NAME
