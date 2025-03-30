@@ -20,8 +20,7 @@ sudo docker create --name $CONTAINER_NAME \
     --network=$DOCKER_NETWORK \
     --restart=always \
     --log-opt max-size=1g --log-opt max-file=3 \
-    -p 80:3000 \
-    -p 3001:3001/udp \
+    -p 443:8443 \
     -d $IMAGE_NAME:$TAG "$1"
 
 # RUN the container
