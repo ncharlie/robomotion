@@ -9,6 +9,7 @@ Robomotion uses Netpie as an MQTT broker for robot-server communication.
 3. Secret
 
 ## Interface List
+
 - [Location Broadcasting](#location%20broadcasting)
 - [Movement](#movement)
 - [Notification](#notification)
@@ -19,9 +20,12 @@ Robomotion uses Netpie as an MQTT broker for robot-server communication.
 
 ```json
 {
-    "x": 101.52,
-    "y": 203.67,
-    "z": 0
+  "r": "robot_id_A",
+  "x": 101,
+  "y": 203,
+  "z": 0,
+  "h": 3599, // heading (0-3599)
+  "s": 60 // speed
 }
 ```
 
