@@ -12,18 +12,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func ptr[T any](value T) *T {
-	return &value
-}
-
-type LogRepository struct {
+type NotificationRepository struct {
 	collection *mongo.Collection
 }
 
-func NewLogRepository(client *mongo.Client) *LogRepository {
-	coll := client.Database(env.Get("mongodb.db_name")).Collection(env.Get("mongodb.log_collection"))
+func NewNotificationRepository(client *mongo.Client) *NotificationRepository {
+	coll := client.Database(env.Get("mongodb.db_name")).Collection(env.Get("mongodb.notification_collection"))
 
-	repo := LogRepository{
+	repo := NotificationRepository{
 		collection: coll,
 	}
 
@@ -31,19 +27,18 @@ func NewLogRepository(client *mongo.Client) *LogRepository {
 	return &repo
 }
 
-func (r *LogRepository) InsertLog(log *entities.TransactionLog) error {
+func (r *NotificationRepository) Insert(noti *entities.Notification) error {
 	var ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	log.CreatedAt = time.Now()
+	noti.CreatedAt = time.Now()
 
-	_, err := r.collection.InsertOne(ctx, log, nil)
-	// t, _ := time.Parse(time.RFC3339, "2023-05-10T16:29:40.333+07:00")
+	_, err := r.collection.InsertOne(ctx, noti, nil)
 
 	return err
 }
 
-func (r *LogRepository) CreateIndex() error {
+func (r *NotificationRepository) CreateIndex() error {
 	var ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -57,7 +52,8 @@ func (r *LogRepository) CreateIndex() error {
 		{
 			Keys: bson.D{{"created_at", -1}},
 			Options: &options.IndexOptions{
-				Name: ptr("time"),
+				Name:               ptr("time"),
+				ExpireAfterSeconds: ptr(int32(259200)), // 3 days
 			},
 		},
 	}
@@ -67,6 +63,6 @@ func (r *LogRepository) CreateIndex() error {
 		panic(err)
 	}
 
-	slog.Info("Index created for Log Repo", "name", result)
+	slog.Info("Index created for Noti Repo", "name", result)
 	return err
 }
