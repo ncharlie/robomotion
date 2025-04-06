@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"robomotion/env"
+	"robomotion/handlers"
 	"robomotion/repositories"
 	"robomotion/services"
 	"robomotion/utils"
@@ -33,11 +34,18 @@ func main() {
 	)
 	defer utils.DisconnectMqtt(mqttConn)
 
-	_ = repositories.NewLogRepository(dbConn)
-	_ = services.NewMqttService(nil, mqttConn)
+	robotRepo := repositories.NewRobotRepository(dbConn)
+	beaconRepo := repositories.NewBeaconRepository(dbConn)
+	logRepo := repositories.NewLogRepository(dbConn)
+	notiRepo := repositories.NewNotificationRepository(dbConn)
+	service := services.NewService(robotRepo, beaconRepo, logRepo, notiRepo)
+	handler := handlers.NewSubscribeHandler(service)
+	_ = services.NewMqttService(logRepo, mqttConn)
 
 	r := mux.NewRouter()
 	// r.HandleFunc("/search/{searchTerm}", Search)
+	r.HandleFunc("/auth", handler.Auth).Methods("POST")
+	r.HandleFunc("/update", handler.GetParams).Methods("GET")
 	static := http.StripPrefix("/static/", http.FileServer(http.Dir("./static/")))
 	r.PathPrefix("/static/").Handler(static)
 

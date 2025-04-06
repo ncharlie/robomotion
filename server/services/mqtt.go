@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"robomotion/env"
 	"robomotion/models/dto"
+	"robomotion/models/entities"
 	"robomotion/repositories"
 	"robomotion/utils"
 
@@ -13,7 +14,7 @@ import (
 )
 
 type MqttService struct {
-	LogRepository *repositories.LogRepository
+	logRepository *repositories.LogRepository
 	client        mqtt.Client
 	data          chan dto.Robot
 	notification  chan dto.Robot
@@ -21,7 +22,7 @@ type MqttService struct {
 
 func NewMqttService(logRepository *repositories.LogRepository, client mqtt.Client) *MqttService {
 	s := MqttService{
-		LogRepository: logRepository,
+		logRepository: logRepository,
 		client:        client,
 		data:          make(chan dto.Robot, 200),
 		notification:  make(chan dto.Robot, 50),
@@ -34,7 +35,22 @@ func NewMqttService(logRepository *repositories.LogRepository, client mqtt.Clien
 		for {
 			select {
 			case data := <-s.data:
-				slog.Info("Decoded c location", "data", data)
+				log := entities.Update{
+					RobotId: data.RobotId,
+					Location: entities.Location{
+						X:       data.X,
+						Y:       data.Y,
+						Z:       data.Z,
+						Heading: data.Heading,
+						Speed:   data.Speed,
+					},
+				}
+
+				if err := logRepository.InsertLog(&log); err != nil {
+					slog.Error("Failed to insert log", "error", err)
+				} else {
+					slog.Info("Decoded c location", "data", data)
+				}
 			case data := <-s.notification:
 				slog.Info("Decoded c noti", "data", data)
 			}

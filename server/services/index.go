@@ -5,13 +5,22 @@ import (
 )
 
 type Service struct {
-	LogRepository *repositories.LogRepository
+	robotRepository        *repositories.RobotRepository
+	beaconRepository       *repositories.BeaconRepository
+	logRepository          *repositories.LogRepository
+	notificationRepository *repositories.NotificationRepository
 }
 
 func NewService(
+	robotRepository *repositories.RobotRepository,
+	beaconRepository *repositories.BeaconRepository,
 	logRepository *repositories.LogRepository,
+	notificationRepository *repositories.NotificationRepository,
 ) *Service {
 	return &Service{
-		LogRepository: logRepository,
+		robotRepository:        robotRepository,
+		beaconRepository:       beaconRepository,
+		logRepository:          logRepository,
+		notificationRepository: notificationRepository,
 	}
 }
