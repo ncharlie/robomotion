@@ -71,6 +71,8 @@ A visual representation of the project's architecture.
 1. Test and debug backend module
 2. Test and debug frontend module
 3. Adjust MQTT message format
+4. Testing Ultrasonic Sensor (HC-SR04) for obstacle detection
+5. Testing location estimation with RSSI value with ESP32 
 
 ## Usage
 
