@@ -72,7 +72,13 @@ A visual representation of the project's architecture.
 2. Test and debug frontend module
 3. Adjust MQTT message format
 4. Testing Ultrasonic Sensor (HC-SR04) for obstacle detection
-5. Testing location estimation with RSSI value with ESP32 
+5. Testing location estimation with RSSI value with ESP32
+
+#### Week 8 (Apr 7)
+
+1. Deploy webserver and database on AWS
+2. Start working on ESP32 - Mega2560 communication
+3. Adjust user interface
 
 ## Usage
 
