@@ -79,6 +79,7 @@ A visual representation of the project's architecture.
 1. Deploy webserver and database on AWS
 2. Start working on ESP32 - Mega2560 communication
 3. Adjust user interface
+4. ESP32 trilateration testing
 
 ## Usage
 
