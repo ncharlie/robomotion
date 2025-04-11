@@ -1,11 +1,13 @@
 #ifndef _SPEED_CONTROL_H_
 #define _SPEED_CONTROL_H_
 
-#define MAX_POWER 255
+#include <limits.h>
 
-#define P(e) e * 0.05        // Kp = 0.05
-#define I(sum) sum * 0.01    // Ki = 0.01
-#define D(diff) diff * 0.01  // Kd = 0.01
+#define MAX_POWER 1024
+
+#define P(e) e * 0.01         // Kp
+#define I(sum) sum * 0.004    // Ki
+#define D(diff) diff * 0.002  // Kd
 
 class Speed {
    private:
@@ -42,10 +44,10 @@ class Speed {
         else
             elapsed = now + (ULONG_MAX - last);
 
-        if (count < 96)
+        if (count < 20)
             encoderRPM = 0;
         else
-            encoderRPM = 78 * count / elapsed;
+            encoderRPM = 5000 * count / elapsed;
         // 78125
     }
 
@@ -54,7 +56,7 @@ class Speed {
     int checkSpeed(int tSpd) {
         if (tSpd == 0) {
             powerLevel = 0;
-            return;
+            return powerLevel;
         }
 
         int error = tSpd - encoderRPM;
@@ -65,10 +67,10 @@ class Speed {
         int d = D((error - prevError));
         prevError = error;
 
-        char message[100];
-        sprintf(message, "Target = %d Speed = %lu rpm\tPower = %d\tAdjust = %d\tP=%d I=%d D=%d",
-                tSpd, encoderRPM, powerLevel, p + i + d, p, i, d);
-        Serial.println(message);
+        // char message[100];
+        // sprintf(message, "Target = %d Speed = %lu rpm\tPower = %d\tAdjust = %d\tP=%d I=%d D=%d",
+        //     tSpd, encoderRPM, powerLevel, p+i+d, p, i, d);
+        // Serial.println(message);
 
         powerLevel += p + i + d;
         if (powerLevel < 0)
@@ -76,6 +78,7 @@ class Speed {
         else if (powerLevel > MAX_POWER)
             powerLevel = MAX_POWER;
 
+        if (i) sumError = 0;
         return powerLevel;
     }
 

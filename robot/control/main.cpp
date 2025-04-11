@@ -3,10 +3,10 @@
 
 #include "compass.h"
 #include "controller.h"
-#include "data.h"
 #include "dout.h"
 #include "motion.h"
 #include "speed.h"
+// #include "data.h"
 
 int main() {
     init();
@@ -15,89 +15,93 @@ int main() {
 
     DigitalOutput led(DDRB, DDB7, PORTB, PB7);
 
-    // controller
-    auto co = Controller();
-
     SREG |= _BV(SREG_I);  // Enable global interrupt
 
     unsigned long now = 0;
     unsigned long secondTrigger = 0;  // last time the input pin was triggered
-
-    auto showMoves = [&rover](void) {
-        rover.setPower(MAX_POWER / 2);
-        rover.setDirection(FORWARD);
-        delay(2000);
-        rover.setDirection(BACKWARD);
-        delay(2000);
-        rover.setDirection(RIGHT);
-        delay(2000);
-        rover.setDirection(LEFT);
-        delay(2000);
-        rover.setDirection(RIGHTTURN);
-        delay(1500);
-        rover.setDirection(LEFTTURN);
-        delay(1500);
-        rover.setDirection(CWSPIN);
-        delay(1500);
-        rover.setDirection(CCWSPIN);
-        delay(1500);
-        rover.setDirection(STOP);
-    };
+    unsigned long fastTrigger = 0;
+    unsigned long commandTrigger = 0;
 
     Serial.begin(9600);
+    Serial3.begin(115200);
 
     rover.setDirection(STOP);
-    rover.setPower(0);
+    rover.setSpeed(0);
     delay(1000);
-    // showMoves();
 
     for (;;) {
-        uint8_t buttonState = co.read();
-
         now = millis();
-        if (now - secondTrigger >= 1000) {
-            // run every 1 second
-            // Serial.println(count);
-            secondTrigger = now;
+        if (now - fastTrigger >= 200) {  // run every 200 ms
+            rover.controlSpeed();
+            compass.update();
+            fastTrigger = millis();
+        }
 
-            rover.frSpd.updateSpeed();
-            Serial.print(buttonState);
-            Serial.print(" ");
-            Serial.print(compass.read());
-            Serial.print(" ");
-            Serial.println(rover.frSpd.getSpeed());
+        if (now - secondTrigger >= 1500) {  // run every 1 second
+            char log[100];
+            sprintf(log, "Heading: %d\tFront: %lu-%lu\n\t\tBack : %lu-%lu\n", compass.read(), rover.flSpd.getSpeed(), rover.frSpd.getSpeed(), rover.rlSpd.getSpeed(), rover.rrSpd.getSpeed());
+            Serial.print(log);
+
+            uint16_t fl = OCR4B;
+            uint16_t fr = OCR1A;
+            uint16_t rl = OCR4C;
+            uint16_t rr = OCR1B;
+
+            sprintf(log, "Speed regis\tFront: %hu-%hu\n\t\tBack : %hu-%hu\n", fl, fr, rl, rr);
+            Serial.print(log);
+
+            char message[16];
+            sprintf(message, "%lu,%d,%d\0", rover.frSpd.getSpeed(), compass.read(), false);
+            Serial3.print(message);
+
+            secondTrigger = millis();
         }
 
         bool ledOn = true;
 
-        if (buttonState == 0) {
-            ledOn = false;
+        if (Serial3.available()) {
+            String command = Serial3.readStringUntil('\n');
+            command.trim();
+            command.toUpperCase();
+            Serial.print("Command received: ");
+            Serial.println(command);
+            int speed = 3000;
+
+            commandTrigger = millis();
+            if (command.equals("ST")) {
+                rover.setDirection(STOP);
+                speed = 0;
+            } else if (command.equals("FW")) {
+                rover.setDirection(FORWARD);
+            } else if (command.equals("BW")) {
+                rover.setDirection(BACKWARD);
+            } else if (command.equals("RW")) {
+                rover.setDirection(RIGHT);
+            } else if (command.equals("RF")) {
+                rover.setDirection(RIGHTFW);
+            } else if (command.equals("RB")) {
+                rover.setDirection(RIGHTBW);
+            } else if (command.equals("RT")) {
+                rover.setDirection(RIGHTTURN);
+                commandTrigger -= 500;
+            } else if (command.equals("LW")) {
+                rover.setDirection(LEFT);
+            } else if (command.equals("LF")) {
+                rover.setDirection(LEFTFW);
+            } else if (command.equals("LB")) {
+                rover.setDirection(LEFTBW);
+            } else if (command.equals("LT")) {
+                rover.setDirection(LEFTTURN);
+                commandTrigger -= 500;
+            } else {
+                rover.setDirection(STOP);
+                speed = 0;
+            }
+
+            rover.setSpeed(speed);
+        } else if (now - commandTrigger >= 10000) {
             rover.setDirection(STOP);
-            rover.setPower(0);
-        } else if (buttonState == 1) {
-            ledOn = false;
-            rover.setPower(0);
-        } else if (buttonState == 4) {  // forward
-            rover.setDirection(FORWARD);
-            rover.setPower(MAX_POWER);
-        } else if (buttonState == 5) {  // backward
-            rover.setDirection(BACKWARD);
-            rover.setPower(MAX_POWER / 2);
-        } else if (buttonState == 2) {  // rightward
-            rover.setDirection(RIGHT);
-            rover.setPower(MAX_POWER / 4);
-        } else if (buttonState == 3) {  // leftward
-            rover.setDirection(LEFT);
-            rover.setPower(MAX_POWER / 4);
-        } else if (buttonState == 6) {  // clockwise spin
-            rover.setDirection(CWSPIN);
-            rover.setPower(MAX_POWER / 5);
-        } else if (buttonState == 7) {  // counter clockwise spin
-            rover.setDirection(CCWSPIN);
-            rover.setPower(MAX_POWER / 5);
-        } else {
-            ledOn = false;
-            rover.setPower(0);
+            rover.setSpeed(0);
         }
 
         ledOn ? led.On() : led.Off();

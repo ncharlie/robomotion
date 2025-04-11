@@ -3,20 +3,21 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <binary.h>
-#include <limits.h>
 
 #include "speed.h"
 
 enum Direction {
-    STOP = B00000000,
-    FORWARD = 0B01100110,
-    RIGHT = B10100101,
-    BACKWARD = ~FORWARD,
-    LEFT = ~RIGHT,
-    CWSPIN = B10010110,
-    CCWSPIN = ~CWSPIN,
-    RIGHTTURN = B00100100,
-    LEFTTURN = B01000010
+    STOP = B00000000,       // ·
+    FORWARD = 0B01100110,   // ↑
+    BACKWARD = ~FORWARD,    // ↓
+    RIGHT = B10100101,      // →
+    RIGHTFW = B00100100,    // ↗
+    RIGHTBW = B10000001,    // ↘
+    RIGHTTURN = B10010110,  // ↻ (Rotate clockwise)
+    LEFT = ~RIGHT,          // ←
+    LEFTFW = B01000010,     // ↖
+    LEFTBW = B00011000,     // ↙
+    LEFTTURN = ~RIGHTTURN   // ↺ (Rotate counterclockwise)
 };
 
 class Motion {
@@ -30,7 +31,7 @@ class Motion {
     Speed rlSpd;
 
    public:
-    Motion() {
+    Motion() : targetSpeed(0) {
         // -------------- DIRECTION ------------------
         // 30 (PC7), 31 (PC6) <--- front-right
         // 32 (PC5), 33 (PC4) <--- rear-right
@@ -81,52 +82,46 @@ class Motion {
         EICRA = _BV(ISC31) | _BV(ISC30) | _BV(ISC21) | _BV(ISC20);  // set INT2-3 to detect rising edge
         EICRB = _BV(ISC51) | _BV(ISC50) | _BV(ISC41) | _BV(ISC40);  // set INT4-5 to detect rising edge
         EIMSK |= _BV(INT5) | _BV(INT4) | _BV(INT3) | _BV(INT2);     // Enable INT2-5 interrupt
-
-        targetSpeed = 0;
     }
 
     void setDirection(Direction dir) {
         PORTC = dir;
+        frSpd.reset();
+        rrSpd.reset();
+        flSpd.reset();
+        rlSpd.reset();
     }
 
-    void setPower(uint16_t powerLevel) {
-        OCR1A = OCR1B = OCR4B = OCR4C = powerLevel;
-    }
+    // void setPower(uint16_t powerLevel) {
+    //     OCR1A = OCR1B = OCR4B = OCR4C = powerLevel;
+    // }
 
     void setSpeed(int speed) {
         targetSpeed = speed;
+        frSpd.reset();
+        rrSpd.reset();
+        flSpd.reset();
+        rlSpd.reset();
     }
 
     void controlSpeed() {
         frSpd.updateSpeed();
-        // rrSpd.updateSpeed();
-        // flSpd.updateSpeed();
-        // rlSpd.updateSpeed();
+        rrSpd.updateSpeed();
+        flSpd.updateSpeed();
+        rlSpd.updateSpeed();
 
         OCR1A = (unsigned long)frSpd.checkSpeed(targetSpeed);
-        // OCR1B = (unsigned long) rrSpd.checkSpeed(targetSpeed);
-        // OCR4C = (unsigned long) flSpd.checkSpeed(targetSpeed);
-        // OCR4B = (unsigned long) rlSpd.checkSpeed(targetSpeed);
+        OCR1B = (unsigned long)rrSpd.checkSpeed(targetSpeed);
+        OCR4B = (unsigned long)flSpd.checkSpeed(targetSpeed);
+        OCR4C = (unsigned long)rlSpd.checkSpeed(targetSpeed);
     }
 };
 
 Motion rover;
 
-ISR(INT5_vect) {
-    rover.frSpd.countSinceLast++;
-    Serial.print(".");
-}
-ISR(INT4_vect) {
-    rover.rrSpd.countSinceLast++;
-    Serial.print(".");
-}
-ISR(INT3_vect) {
-    rover.flSpd.countSinceLast++;
-    Serial.print(".");
-}
-ISR(INT2_vect) {
-    rover.rlSpd.countSinceLast++;
-    Serial.print(".");
-}
+ISR(INT5_vect) { rover.frSpd.countSinceLast++; }
+ISR(INT4_vect) { rover.rrSpd.countSinceLast++; }
+ISR(INT3_vect) { rover.flSpd.countSinceLast++; }
+ISR(INT2_vect) { rover.rlSpd.countSinceLast++; }
 
 #endif /* _MOTION_CONTROL_H_ */
