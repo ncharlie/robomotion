@@ -14,6 +14,13 @@ int main() {
     SREG &= ~_BV(SREG_I);  // Disable global interrupt
 
     DigitalOutput led(DDRB, DDB7, PORTB, PB7);
+    DDRH |= _BV(DDH5) | _BV(DDH4);
+    PRR1 &= ~_BV(PRTIM4);
+    TCCR4A = _BV(COM4B1) | _BV(COM3C1) | _BV(WGM41);
+    TCCR4B = _BV(WGM43) | _BV(WGM42) | _BV(CS40);
+    ICR1 = ICR4 = MAX_POWER;
+    OCR4B = OCR4C = 0;
+    TCNT4 = 0;
 
     SREG |= _BV(SREG_I);  // Enable global interrupt
 
@@ -99,7 +106,7 @@ int main() {
             }
 
             rover.setSpeed(speed);
-        } else if (now - commandTrigger >= 10000) {
+        } else if (now - commandTrigger >= 1000) {
             rover.setDirection(STOP);
             rover.setSpeed(0);
         }
