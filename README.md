@@ -81,6 +81,10 @@ A visual representation of the project's architecture.
 3. Adjust user interface
 4. ESP32 trilateration testing
 
+#### Week 9 (Apr 14)
+
+1. Test robot movement with user control
+
 ## Usage
 
 1. Setup the robot. See [Robot Installation](robot/readme.md).
