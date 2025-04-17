@@ -20,6 +20,12 @@ enum Direction {
     LEFTTURN = ~RIGHTTURN   // ↺ (Rotate counterclockwise)
 };
 
+int spdLevel[7] = {0, 2800, 3800, 4800, 5800, 6800, 10000};
+int frBase[7] = {0, 91, 120, 160, 233, 410, MAX_POWER};
+int rrBase[7] = {0, 107, 138, 184, 258, 505, MAX_POWER};
+int flBase[7] = {0, 164, 212, 315, 432, 768, MAX_POWER};
+int rlBase[7] = {0, 75, 104, 158, 248, 590, MAX_POWER};
+
 class Motion {
    private:
     int targetSpeed;
@@ -31,7 +37,7 @@ class Motion {
     Speed rlSpd;
 
    public:
-    Motion() : targetSpeed(0) {
+    Motion() : targetSpeed(0), frSpd(frBase), rrSpd(rrBase), flSpd(flBase), rlSpd(rlBase) {
         // -------------- DIRECTION ------------------
         // 30 (PC7), 31 (PC6) <--- front-right
         // 32 (PC5), 33 (PC4) <--- rear-right
@@ -96,12 +102,20 @@ class Motion {
     //     OCR1A = OCR1B = OCR4B = OCR4C = powerLevel;
     // }
 
-    void setSpeed(int speed) {
-        targetSpeed = speed;
+    void setSpeed(int level) {
+        targetSpeed = spdLevel[level];
+        // Serial.print("Setting target speed to ");
+        // Serial.println(targetSpeed);
+
         frSpd.reset();
         rrSpd.reset();
         flSpd.reset();
         rlSpd.reset();
+
+        OCR1A = (unsigned long)frBase[level];
+        OCR1B = (unsigned long)rrBase[level];
+        OCR4B = (unsigned long)flBase[level];
+        OCR4C = (unsigned long)rlBase[level];
     }
 
     void controlSpeed() {

@@ -2,7 +2,6 @@
 #include <avr/io.h>
 
 #include "compass.h"
-#include "controller.h"
 #include "dout.h"
 #include "motion.h"
 #include "speed.h"
@@ -25,9 +24,11 @@ int main() {
     SREG |= _BV(SREG_I);  // Enable global interrupt
 
     unsigned long now = 0;
-    unsigned long secondTrigger = 0;  // last time the input pin was triggered
-    unsigned long fastTrigger = 0;
+    unsigned long lastUpdate20ms = 0;  // last time the input pin was triggered
+    unsigned long lastUpdate200ms = 0;
+    unsigned long lastUpdate1500ms = 0;  // last time the input pin was triggered
     unsigned long commandTrigger = 0;
+    int speedLevel = 0;
 
     Serial.begin(9600);
     Serial3.begin(115200);
@@ -38,15 +39,19 @@ int main() {
 
     for (;;) {
         now = millis();
-        if (now - fastTrigger >= 200) {  // run every 200 ms
+        if (now - lastUpdate20ms >= 20) {  // run every 10 ms
             rover.controlSpeed();
-            compass.update();
-            fastTrigger = millis();
+            lastUpdate20ms = millis();
         }
 
-        if (now - secondTrigger >= 1500) {  // run every 1 second
+        if (now - lastUpdate200ms >= 200) {  // run every 200 ms
+            compass.update();
+            lastUpdate200ms = millis();
+        }
+
+        if (now - lastUpdate1500ms >= 1500) {  // run every 1 second
             char log[100];
-            sprintf(log, "Heading: %d\tFront: %lu-%lu\n\t\tBack : %lu-%lu\n", compass.read(), rover.flSpd.getSpeed(), rover.frSpd.getSpeed(), rover.rlSpd.getSpeed(), rover.rrSpd.getSpeed());
+            sprintf(log, "Heading: %d\tFront: %lu-%lu\tBack : %lu-%lu", compass.read(), rover.flSpd.getSpeed(), rover.frSpd.getSpeed(), rover.rlSpd.getSpeed(), rover.rrSpd.getSpeed());
             Serial.print(log);
 
             uint16_t fl = OCR4B;
@@ -54,14 +59,15 @@ int main() {
             uint16_t rl = OCR4C;
             uint16_t rr = OCR1B;
 
-            sprintf(log, "Speed regis\tFront: %hu-%hu\n\t\tBack : %hu-%hu\n", fl, fr, rl, rr);
+            // sprintf(log, "Speed regis\tFront: %hu-%hu\n\t\tBack : %hu-%hu\n", fl, fr, rl, rr);
+            sprintf(log, "Speed regis\tFront: %hu-%hu\tBack : %hu-%hu\n", OCR4B, OCR1A, OCR4C, OCR1B);
             Serial.print(log);
 
             char message[16];
             sprintf(message, "%lu,%d,%d\0", rover.frSpd.getSpeed(), compass.read(), false);
             Serial3.print(message);
 
-            secondTrigger = millis();
+            lastUpdate1500ms = millis();
         }
 
         bool ledOn = true;
@@ -72,12 +78,11 @@ int main() {
             command.toUpperCase();
             Serial.print("Command received: ");
             Serial.println(command);
-            int speed = 3000;
 
             commandTrigger = millis();
             if (command.equals("ST")) {
                 rover.setDirection(STOP);
-                speed = 0;
+                // rover.setSpeed(0);
             } else if (command.equals("FW")) {
                 rover.setDirection(FORWARD);
             } else if (command.equals("BW")) {
@@ -90,7 +95,6 @@ int main() {
                 rover.setDirection(RIGHTBW);
             } else if (command.equals("RT")) {
                 rover.setDirection(RIGHTTURN);
-                commandTrigger -= 500;
             } else if (command.equals("LW")) {
                 rover.setDirection(LEFT);
             } else if (command.equals("LF")) {
@@ -99,16 +103,22 @@ int main() {
                 rover.setDirection(LEFTBW);
             } else if (command.equals("LT")) {
                 rover.setDirection(LEFTTURN);
-                commandTrigger -= 500;
+            } else if (command.equals("S1")) {
+                rover.setSpeed(1);
+            } else if (command.equals("S2")) {
+                rover.setSpeed(2);
+            } else if (command.equals("S3")) {
+                rover.setSpeed(3);
+            } else if (command.equals("S4")) {
+                rover.setSpeed(4);
+            } else if (command.equals("S5")) {
+                rover.setSpeed(5);
+            } else if (command.equals("S6")) {
+                rover.setSpeed(6);
             } else {
                 rover.setDirection(STOP);
-                speed = 0;
+                // rover.setSpeed(0);
             }
-
-            rover.setSpeed(speed);
-        } else if (now - commandTrigger >= 1000) {
-            rover.setDirection(STOP);
-            rover.setSpeed(0);
         }
 
         ledOn ? led.On() : led.Off();

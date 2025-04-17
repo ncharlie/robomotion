@@ -16,11 +16,12 @@ class Speed {
     int powerLevel;
     int sumError;
     int prevError;
+    int* base;
 
    public:
     unsigned long countSinceLast;
 
-    Speed() {
+    Speed(int* baseSpeed) : base(baseSpeed) {
         // 64 * 12 = 768 per 1 round (314 mm)
         // 3. Pin 18 INT3 <--- front-right
         // 2. Pin 19 INT2 <--- rear-right
@@ -44,7 +45,7 @@ class Speed {
         else
             elapsed = now + (ULONG_MAX - last);
 
-        if (count < 20)
+        if (count < 12)
             encoderRPM = 0;
         else
             encoderRPM = 5000 * count / elapsed;
