@@ -29,6 +29,7 @@ int rlBase[7] = {0, 75, 104, 158, 248, 590, MAX_POWER};
 class Motion {
    private:
     int targetSpeed;
+    int currentDirection;
 
    public:
     Speed frSpd;
@@ -91,7 +92,10 @@ class Motion {
     }
 
     void setDirection(Direction dir) {
+        if (dir == currentDirection) return;
+
         PORTC = dir;
+        currentDirection = dir;
         frSpd.reset();
         rrSpd.reset();
         flSpd.reset();
@@ -119,15 +123,15 @@ class Motion {
     }
 
     void controlSpeed() {
-        frSpd.updateSpeed();
-        rrSpd.updateSpeed();
-        flSpd.updateSpeed();
-        rlSpd.updateSpeed();
+        frSpd.updateSpeed(0);
+        rrSpd.updateSpeed(0);
+        flSpd.updateSpeed(0);
+        rlSpd.updateSpeed(0);
 
-        OCR1A = (unsigned long)frSpd.checkSpeed(targetSpeed);
-        OCR1B = (unsigned long)rrSpd.checkSpeed(targetSpeed);
-        OCR4B = (unsigned long)flSpd.checkSpeed(targetSpeed);
-        OCR4C = (unsigned long)rlSpd.checkSpeed(targetSpeed);
+        if (currentDirection && B11000000) OCR1A = (unsigned long)frSpd.checkSpeed(targetSpeed);
+        if (currentDirection && B00110000) OCR1B = (unsigned long)rrSpd.checkSpeed(targetSpeed);
+        if (currentDirection && B00001100) OCR4B = (unsigned long)flSpd.checkSpeed(targetSpeed);
+        if (currentDirection && B11000011) OCR4C = (unsigned long)rlSpd.checkSpeed(targetSpeed);
     }
 };
 

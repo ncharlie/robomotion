@@ -29,7 +29,7 @@ class Speed {
         // 0. Pin 21 INT0 <--- rear-left
     }
 
-    void updateSpeed() {
+    void updateSpeed(bool log) {
         unsigned long elapsed;
 
         unsigned long now = millis();
@@ -40,15 +40,25 @@ class Speed {
         lastUpdate = now;
         countSinceLast = 0;
 
-        if (now > last)
-            elapsed = now - last;
-        else
-            elapsed = now + (ULONG_MAX - last);
+        unsigned long elapsed = now - last;
 
-        if (count < 12)
-            encoderRPM = 0;
-        else
-            encoderRPM = 5000 * count / elapsed;
+        // if (now > last)
+        //     elapsed = now - last;
+        // else
+        //     elapsed = now + (ULONG_MAX - last);
+        // if (count < 3)
+        //     encoderRPM = 0;
+        // else
+        //     encoderRPM = 5000 * count / elapsed;
+
+        encoderRPM = 5000 * count / elapsed;
+
+        if (log) {
+            char message[100];
+            sprintf(message, "encoderRPM: %lu = 5000 * (count: %lu) / (elapse: %lu)\n",
+                    encoderRPM, count, elapsed);
+            Serial.print(message);
+        }
         // 78125
     }
 

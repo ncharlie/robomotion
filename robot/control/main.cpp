@@ -5,7 +5,6 @@
 #include "dout.h"
 #include "motion.h"
 #include "speed.h"
-// #include "data.h"
 
 int main() {
     init();
@@ -28,18 +27,17 @@ int main() {
     unsigned long lastUpdate200ms = 0;
     unsigned long lastUpdate1500ms = 0;  // last time the input pin was triggered
     unsigned long commandTrigger = 0;
-    int speedLevel = 0;
 
     Serial.begin(9600);
     Serial3.begin(115200);
 
     rover.setDirection(STOP);
-    rover.setSpeed(0);
+    rover.setSpeed(2);
     delay(1000);
 
     for (;;) {
         now = millis();
-        if (now - lastUpdate20ms >= 20) {  // run every 10 ms
+        if (now - lastUpdate20ms >= 100) {  // run every 100 ms
             rover.controlSpeed();
             lastUpdate20ms = millis();
         }
@@ -73,7 +71,9 @@ int main() {
         bool ledOn = true;
 
         if (Serial3.available()) {
+            // if (Serial.available()) {
             String command = Serial3.readStringUntil('\n');
+            // String command = Serial.readString();
             command.trim();
             command.toUpperCase();
             Serial.print("Command received: ");
@@ -82,7 +82,6 @@ int main() {
             commandTrigger = millis();
             if (command.equals("ST")) {
                 rover.setDirection(STOP);
-                // rover.setSpeed(0);
             } else if (command.equals("FW")) {
                 rover.setDirection(FORWARD);
             } else if (command.equals("BW")) {
@@ -103,6 +102,8 @@ int main() {
                 rover.setDirection(LEFTBW);
             } else if (command.equals("LT")) {
                 rover.setDirection(LEFTTURN);
+            } else if (command.equals("S0")) {
+                rover.setSpeed(0);
             } else if (command.equals("S1")) {
                 rover.setSpeed(1);
             } else if (command.equals("S2")) {
@@ -117,8 +118,9 @@ int main() {
                 rover.setSpeed(6);
             } else {
                 rover.setDirection(STOP);
-                // rover.setSpeed(0);
             }
+        } else if (now - commandTrigger >= 10000) {
+            rover.setDirection(STOP);
         }
 
         ledOn ? led.On() : led.Off();
