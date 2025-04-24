@@ -124,7 +124,7 @@ class Motion {
 
     void controlSpeed() {
         frSpd.updateSpeed(0);
-        rrSpd.updateSpeed(0);
+        rrSpd.updateSpeed(1);
         flSpd.updateSpeed(0);
         rlSpd.updateSpeed(0);
 

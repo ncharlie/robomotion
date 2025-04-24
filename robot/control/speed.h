@@ -30,8 +30,6 @@ class Speed {
     }
 
     void updateSpeed(bool log) {
-        unsigned long elapsed;
-
         unsigned long now = millis();
         unsigned long last = lastUpdate;
         unsigned long count = countSinceLast;
@@ -53,12 +51,12 @@ class Speed {
 
         encoderRPM = 5000 * count / elapsed;
 
-        if (log) {
-            char message[100];
-            sprintf(message, "encoderRPM: %lu = 5000 * (count: %lu) / (elapse: %lu)\n",
-                    encoderRPM, count, elapsed);
-            Serial.print(message);
-        }
+        // if (log) {
+        //     char message[100];
+        //     sprintf(message, "encoderRPM: %lu = 5000 * (count: %lu) / (elapse: %lu)\n",
+        //             encoderRPM, count, elapsed);
+        //     Serial.print(message);
+        // }
         // 78125
     }
 

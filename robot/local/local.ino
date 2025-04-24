@@ -73,37 +73,48 @@ void setup(void) {
     <button onclick="move('rb')">C</button>
   </body>
   <script>
-//      let keysPressed = {};
-//
-//      document.addEventListener("keydown", function(event) {
-//          keysPressed[event.key] = true;
-//
-//          if (keysPressed["ArrowUp"] && keysPressed["ArrowLeft"]) move("lf");
-//          else if (keysPressed["ArrowUp"] && keysPressed["ArrowRight"]) move("rf");
-//          else if (keysPressed["ArrowDown"] && keysPressed["ArrowLeft"]) move("lb");
-//          else if (keysPressed["ArrowDown"] && keysPressed["ArrowRight"]) move("rb");
-//          else if (event.key === "ArrowUp") move("fw");
-//          else if (event.key === "ArrowDown") move("bw");
-//          else if (event.key === "ArrowLeft") move("lw");
-//          else if (event.key === "ArrowRight") move("rw");
-//          else if (event.key === "o" || event.key === "O") move("st");
-//      });
-//
-//      document.addEventListener("keyup", function(event) {
-//          delete keysPressed[event.key];
-//          if (
-//            !keysPressed["ArrowUp"] &&
-//            !keysPressed["ArrowDown"] &&
-//            !keysPressed["ArrowLeft"] &&
-//            !keysPressed["ArrowRight"]
-//        ) {
-//            move("st");  // send stop command
-//        }
-//      });
+    let keysPressed = {};
+    let moving = false;
+    let lastDir = "st";
+    let lastMovTime = Date.now();
 
-      async function move(dir) {
-          await fetch("/" + dir);
-      }
+    async function checkKey() {
+        let dir = "";
+        if (keysPressed["ArrowUp"] && keysPressed["ArrowLeft"]) dir = "lf";
+        else if (keysPressed["ArrowUp"] && keysPressed["ArrowRight"]) dir = "rf";
+        else if (keysPressed["ArrowDown"] && keysPressed["ArrowLeft"]) dir = "lb";
+        else if (keysPressed["ArrowDown"] && keysPressed["ArrowRight"]) dir = "rb";
+        else if (keysPressed["ArrowUp"]) dir = "fw";
+        else if (keysPressed["ArrowDown"]) dir = "bw";
+        else if (keysPressed["ArrowLeft"]) dir = "lw";
+        else if (keysPressed["ArrowRight"]) dir = "rw";
+        else if (keysPressed["KeyO"]) dir = "st";
+        else if (moving) dir = "st";
+
+        if (dir == "") return;
+
+        if (dir != lastDir) {
+            move(dir, true);
+            lastDir = dir;
+            lastMovTime = Date.now();
+        } else if (Date.now() - lastMovTime > 1200) {
+            move(dir, true);
+            lastMovTime = Date.now();
+        }
+    }
+
+    document.addEventListener("keydown", function(event) {
+        keysPressed[event.key] = true;
+    });
+
+    document.addEventListener("keyup", function(event) {
+        keysPressed[event.key] = false;
+    });
+
+    async function move(dir, stop) {
+        if (stop) moving = dir != "st";
+        await fetch("/" + dir);
+    }
 
       async function setSpeed(speedCode) {
           await fetch("/" + speedCode);
@@ -126,7 +137,8 @@ void setup(void) {
           document.getElementById("speed").innerHTML = myArray[0];
       }
 
-      setInterval(fetchData, 2500);
+      setInterval(checkKey, 100);
+      setInterval(fetchData, 2000);
   </script>
 </html>)html");
     });

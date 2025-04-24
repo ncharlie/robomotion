@@ -23,11 +23,14 @@ int main() {
     SREG |= _BV(SREG_I);  // Enable global interrupt
 
     unsigned long now = 0;
-    unsigned long lastUpdate20ms = 0;  // last time the input pin was triggered
-    unsigned long lastUpdate200ms = 0;
+    unsigned long lastUpdate10ms = 0;  // last time the input pin was triggered
+    unsigned long lastUpdate50ms = 0;
+    unsigned long lastUpdate100ms = 0;  // last time the input pin was triggered
     unsigned long lastUpdate1500ms = 0;  // last time the input pin was triggered
     unsigned long commandTrigger = 0;
     int targetHeading = -1;
+    int spinned = 0;
+    int waited = 0;
 
     Serial.begin(9600);
     Serial3.begin(115200);
@@ -38,47 +41,53 @@ int main() {
 
     for (;;) {
         now = millis();
-        if (now - lastUpdate20ms >= 100) {  // run every 100 ms
-            rover.controlSpeed();
-            lastUpdate20ms = millis();
+        if (now - lastUpdate10ms >= 20) {  // run every 10 ms
+            compass.update();
+            lastUpdate10ms = millis();
         }
 
-        if (now - lastUpdate200ms >= 50) {  // run every 200 ms
-            compass.update();
-            lastUpdate200ms = millis();
+        if (now - lastUpdate100ms >= 100) {  // run every 100 ms
+            rover.controlSpeed();
+            lastUpdate100ms = millis();
+        }
+
+        if (now - lastUpdate50ms >= 50) {  // run every 50 ms
+            lastUpdate50ms = millis();
             if (targetHeading != -1) {
-                int current = compass.read() / 10;  // 
-                if (current < 0) {
-                    Serial.println("Compass not ready.");
-                    return;
-                }
-            
-                int diff = targetHeading - current;
-                if (diff > 180) diff -= 360;
-                else if (diff < -180) diff += 360;
-            
-                Serial.print("Heading Control | Current: ");
-                Serial.print(current);
-                Serial.print(" | Target: ");
-                Serial.print(targetHeading);
-                Serial.print(" | Diff: ");
-                Serial.println(diff);
-            
-                if (abs(diff) < 2) {
+                unsigned long lastBearingAdjust = 0;
+                
+                for(;targetHeading != -1;) {
+                    compass.update();
+                    int current = compass.read();
+                    if (current < 0) break;
+                
+                    int diff = targetHeading - current;
+                    if (diff > 1800) diff -= 3600;
+                    else if (diff < -1800) diff += 3600;
+                    
+                    int aDiff = abs(diff);
+                    
+                    if (aDiff < 450) rover.setSpeed(1);
+                    else rover.setSpeed(2);
+                    if (aDiff < 25) {
+                        rover.setDirection(STOP);
+                        targetHeading = -1;
+                    } else if (diff > 0) {
+                        rover.setDirection(RIGHTTURN);
+                    } else {
+                        rover.setDirection(LEFTTURN);
+                    }
+
+                    rover.setSpeed(spdLevel);
+                    delay((5*aDiff)/6);
                     rover.setDirection(STOP);
-                    targetHeading = -1;
-                    Serial.println("Target reached. Stopping.");
-                } else if (diff > 0) {
-                    rover.setDirection(RIGHTTURN);
-                    Serial.println("Turning right.");
-                } else {
-                    rover.setDirection(LEFTTURN);
-                    Serial.println("Turning left.");
+                    compass.update();
+                    delay(500);
                 }
             }
         }
 
-        if (now - lastUpdate1500ms >= 1500) {  // run every 1 second
+        if (now - lastUpdate1500ms >= 1500) {  // run every 1.5 second
             char log[100];
             sprintf(log, "Heading: %d\tFront: %lu-%lu\tBack : %lu-%lu", compass.read(), rover.flSpd.getSpeed(), rover.frSpd.getSpeed(), rover.rlSpd.getSpeed(), rover.rrSpd.getSpeed());
             Serial.print(log);
@@ -113,11 +122,13 @@ int main() {
             commandTrigger = millis();
             if (command.startsWith("H")) {
                 targetHeading = command.substring(1).toInt();
+                targetHeading *= 10;
                 Serial.print("Target heading set: ");
                 Serial.println(targetHeading);
             } else if (command.equals("ST")) {
                 rover.setDirection(STOP);
                 targetHeading = -1;
+                spinned =0 ;
             } else if (command.equals("FW")) {
                 rover.setDirection(FORWARD);
             } else if (command.equals("BW")) {
@@ -155,7 +166,7 @@ int main() {
             } else {
                 rover.setDirection(STOP);
             }
-        } else if (now - commandTrigger >= 10000) {
+        } else if (now - commandTrigger >= 2000) {
             rover.setDirection(STOP);
         }
 
