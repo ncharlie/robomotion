@@ -27,6 +27,7 @@ int main() {
     unsigned long lastUpdate200ms = 0;
     unsigned long lastUpdate1500ms = 0;  // last time the input pin was triggered
     unsigned long commandTrigger = 0;
+    int targetHeading = -1;
 
     Serial.begin(9600);
     Serial3.begin(115200);
@@ -42,9 +43,39 @@ int main() {
             lastUpdate20ms = millis();
         }
 
-        if (now - lastUpdate200ms >= 200) {  // run every 200 ms
+        if (now - lastUpdate200ms >= 50) {  // run every 200 ms
             compass.update();
             lastUpdate200ms = millis();
+            if (targetHeading != -1) {
+                int current = compass.read() / 10;  // 
+                if (current < 0) {
+                    Serial.println("Compass not ready.");
+                    return;
+                }
+            
+                int diff = targetHeading - current;
+                if (diff > 180) diff -= 360;
+                else if (diff < -180) diff += 360;
+            
+                Serial.print("Heading Control | Current: ");
+                Serial.print(current);
+                Serial.print(" | Target: ");
+                Serial.print(targetHeading);
+                Serial.print(" | Diff: ");
+                Serial.println(diff);
+            
+                if (abs(diff) < 2) {
+                    rover.setDirection(STOP);
+                    targetHeading = -1;
+                    Serial.println("Target reached. Stopping.");
+                } else if (diff > 0) {
+                    rover.setDirection(RIGHTTURN);
+                    Serial.println("Turning right.");
+                } else {
+                    rover.setDirection(LEFTTURN);
+                    Serial.println("Turning left.");
+                }
+            }
         }
 
         if (now - lastUpdate1500ms >= 1500) {  // run every 1 second
@@ -80,8 +111,13 @@ int main() {
             Serial.println(command);
 
             commandTrigger = millis();
-            if (command.equals("ST")) {
+            if (command.startsWith("H")) {
+                targetHeading = command.substring(1).toInt();
+                Serial.print("Target heading set: ");
+                Serial.println(targetHeading);
+            } else if (command.equals("ST")) {
                 rover.setDirection(STOP);
+                targetHeading = -1;
             } else if (command.equals("FW")) {
                 rover.setDirection(FORWARD);
             } else if (command.equals("BW")) {
