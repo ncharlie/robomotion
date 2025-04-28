@@ -85,6 +85,17 @@ A visual representation of the project's architecture.
 
 1. Test robot movement with user control
 
+#### Week 10 (Apr 21)
+
+1. View location logs from database in history page
+2. Support multiple robots on web UI
+3. Test 4 ultrasonic sensors (60001)
+
+#### Week 11 (Apr 28)
+
+1. Set up testing environment
+2. Test controlling the robot via web UI
+
 ## Usage
 
 1. Setup the robot. See [Robot Installation](robot/readme.md).
