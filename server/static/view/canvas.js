@@ -1,5 +1,7 @@
 /* globals HTMLElement, window */
 class Canvas extends HTMLElement {
+    static observedAttributes = ['auth'];
+
     constructor() {
         super();
         const sheet = new CSSStyleSheet();
@@ -63,16 +65,16 @@ class Canvas extends HTMLElement {
     }
 
     attributeChangedCallback(attr, oldValue, newValue) {
-        console.log('nav attribute changed', attr, oldValue, '->', newValue);
+        console.log('map attribute changed', attr, oldValue, '->', newValue);
     }
 
     adoptedCallback() {
-        console.log('nav adopted');
+        console.log('map adopted');
         this.render();
     }
 
     disconnectedCallback() {
-        console.log('nav disconnected');
+        console.log('map disconnected');
         this.removeListeners();
         this.shadowRoot.removeChild(this.template);
     }

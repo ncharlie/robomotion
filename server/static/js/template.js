@@ -33,8 +33,13 @@ if (id != -1) {
     const loginBtn = document.querySelector('.login-btn');
     loginBtn.style.display = 'none';
 
-    document.getElementsByTagName('control-module')[0].style.display = 'block';
-    document.getElementsByTagName('map-module')[0].style.display = 'block';
+    const body = document.getElementById('home-content');
+    if (body) {
+        body.appendChild(new Control());
+        body.appendChild(new Canvas());
+    }
+
+    document.getElementsByTagName('main')[0].style.display = 'block';
 } else {
     document.body.classList.toggle('show-popup');
 }

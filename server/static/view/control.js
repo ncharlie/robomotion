@@ -1,5 +1,7 @@
 /* globals HTMLElement, window */
 class Control extends HTMLElement {
+    static observedAttributes = ['auth'];
+
     constructor() {
         super();
         const sheet = new CSSStyleSheet();
@@ -108,7 +110,13 @@ class Control extends HTMLElement {
     }
 
     attributeChangedCallback(attr, oldValue, newValue) {
-        console.log('nav attribute changed', attr, oldValue, '->', newValue);
+        console.log(
+            'control attribute changed',
+            attr,
+            oldValue,
+            '->',
+            newValue
+        );
     }
 
     adoptedCallback() {
@@ -128,28 +136,28 @@ class Control extends HTMLElement {
             <!-- Status Section -->
             <div class="form-group">
                 <label for="robot-id">Robot ID:</label>
-                <input type="text" id="robot-id" value="A558" readonly>
+                <input type="text" id="robot-id" placeholder="Please select a robot" readonly>
             </div>
             <div class="form-group">
                 <label for="x">X:</label>
-                <input type="text" id="x" value="50" readonly>
+                <input type="number" id="x" placeholder="Please select a robot" readonly>
             </div>
             <div class="form-group">
                 <label for="y">Y:</label>
-                <input type="text" id="y" value="75" readonly>
+                <input type="number" id="y" placeholder="Please select a robot" readonly>
             </div>
             <div class="form-group">
                 <label for="speed">Speed:</label>
-                <input type="text" id="speed" value="10" readonly>
+                <input type="number" id="speed" placeholder="Please select a robot" readonly>
                 <span>rpm</span>
             </div>
             <div class="form-group">
                 <label for="heading">Heading:</label>
-                <input type="text" id="heading" value="90" readonly>
+                <input type="number" id="heading" placeholder="Please select a robot" readonly>
                 <span>degree</span>
             </div>
             <!-- Control Section -->
-            <div class="arrow-controls">
+            <div class="arrow-controls" hidden>
                 <div class="arrow-row">
                     <button id="forward">↑ Forward</button>
                 </div>
@@ -163,26 +171,18 @@ class Control extends HTMLElement {
                 </div>
             </div>
             <!-- Notifications Section -->
-            <div class="notifications-container">
-                <div class="notification">
-                    <div class="alert-logo">!</div>
-                    <div class="notification-content">
-                        <div class="notification-title">Notification Title 1</div>
-                        <div class="notification-timestamp">2025-05-06 12:34:56</div>
-                        <div class="notification-message">This is the first notification message.</div>
+            <div class="notifications-container" hidden>
+                <template>
+                    <div class="notification">
+                        <div class="alert-logo">!</div>
+                        <div class="notification-content">
+                            <div class="notification-title">Notification Title 1</div>
+                            <div class="notification-timestamp">2025-05-06 12:34:56</div>
+                            <div class="notification-message">This is the first notification message.</div>
+                        </div>
+                        <button class="dismiss-button" onclick="dismissNotification(this)">✖</button>
                     </div>
-                    <button class="dismiss-button" onclick="dismissNotification(this)">✖</button>
-                </div>
-                <div class="notification">
-                    <div class="alert-logo">!</div>
-                    <div class="notification-content">
-                        <div class="notification-title">Notification Title 2</div>
-                        <div class="notification-timestamp">2025-05-06 12:35:21</div>
-                        <div class="notification-message">This is the second notification message.</div>
-                    </div>
-                    <button class="dismiss-button" onclick="dismissNotification(this)">✖</button>
-                </div>
-                <!-- More notifications can be added here -->
+                </template>
             </div>
         </div>
         </div>
