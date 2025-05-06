@@ -7,6 +7,10 @@
 #include "beacon.h"
 #include "rssi.h"
 
+const char* LocationTopic = "@msg/location/robot1";
+const char* NotificationTopic = "@msg/noti/robot1";
+const char* CommandTopic = "@msg/move/robot1";
+
 std::map<String, Beacon> beacons;
 TFT_eSPI tft = TFT_eSPI();  // Initialize TFT display
 
