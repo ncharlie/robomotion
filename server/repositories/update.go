@@ -66,6 +66,39 @@ func (r *LogRepository) GetLatestLocation(id string) *entities.Update {
 	return &update
 }
 
+func (r *LogRepository) GetLogsPaginated(id string, page int64, pageSize int64) ([]entities.Update, int64, error) {
+	var ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Count total number of logs
+	count, err := r.collection.CountDocuments(ctx, bson.M{
+		"robot_id": id,
+	})
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// Calculate how many documents to skip
+	skip := (page - 1) * pageSize
+
+	// Find logs sorted by created_at in descending order with pagination support
+	opts := options.Find().SetSort(bson.M{"created_at": -1}).SetSkip(skip).SetLimit(pageSize)
+	cursor, err := r.collection.Find(ctx, bson.M{
+		"robot_id": id,
+	}, opts)
+	if err != nil {
+		return nil, count, err
+	}
+	defer cursor.Close(ctx)
+
+	var logs []entities.Update
+	if err := cursor.All(ctx, &logs); err != nil {
+		return nil, count, err
+	}
+
+	return logs, count, nil
+}
+
 func (r *LogRepository) CreateIndex() error {
 	var ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

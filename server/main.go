@@ -48,6 +48,7 @@ func main() {
 	r.HandleFunc("/move", handler.Move).Methods("POST")
 	r.HandleFunc("/update", handler.GetParams).Methods("GET")
 	r.HandleFunc("/noti", handler.GetNoti).Methods("GET")
+	r.HandleFunc("/history", handler.GetHistory).Methods("GET")
 	static := http.StripPrefix("/static/", http.FileServer(http.Dir("./static/")))
 	r.PathPrefix("/static/").Handler(static)
 
