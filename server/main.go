@@ -40,7 +40,7 @@ func main() {
 	notiRepo := repositories.NewNotificationRepository(dbConn)
 	service := services.NewService(robotRepo, beaconRepo, logRepo, notiRepo)
 	handler := handlers.NewSubscribeHandler(service)
-	_ = services.NewMqttService(logRepo, mqttConn)
+	_ = services.NewMqttService(logRepo, notiRepo, mqttConn)
 
 	r := mux.NewRouter()
 	// r.HandleFunc("/search/{searchTerm}", Search)
@@ -53,9 +53,9 @@ func main() {
 		Addr:    "0.0.0.0:" + env.Get("app.port"),
 		Handler: r,
 
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: time.Second * 15,
-		IdleTimeout:  time.Second * 60,
+		ReadTimeout:  120 * time.Second,
+		WriteTimeout: time.Second * 120,
+		IdleTimeout:  time.Second * 120,
 	}
 
 	exit := make(chan os.Signal, 1)

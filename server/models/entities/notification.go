@@ -10,8 +10,8 @@ type Notification struct {
 	ID        primitive.ObjectID `json:"-" bson:"_id,omitempty"`
 	RobotId   string             `json:"r" bson:"robot_id"`
 	CreatedAt time.Time          `json:"-" bson:"created_at"`
-	Type      notiType           `json:"-" bson:"type"`
-	Location  Location           `bson:"inline"`
+	Type      string             `json:"-" bson:"type"`
+	// Location  Location           `bson:"inline"`
 }
 
 type notiType string

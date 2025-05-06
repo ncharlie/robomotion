@@ -25,6 +25,14 @@ func (h *APIHandler) GetParams(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	params := r.URL.Query()
+	robotId := params.Get("id")
+	if robotId == "" {
+		logger.Error("robotId is required")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Expose-Headers", "Content-Type")
 
@@ -46,7 +54,7 @@ func (h *APIHandler) GetParams(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("client disconnected")
 			return
 		case <-t.C:
-			data, err := h.Service.GetLocation("RA")
+			data, err := h.Service.GetLocation(robotId)
 			if err != nil {
 				logger.Error("failed to get location", "error", err)
 				continue

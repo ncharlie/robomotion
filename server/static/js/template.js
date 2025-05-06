@@ -33,11 +33,7 @@ if (id != -1) {
     const loginBtn = document.querySelector('.login-btn');
     loginBtn.style.display = 'none';
 
-    const body = document.getElementById('home-content');
-    if (body) {
-        body.appendChild(new Control());
-        body.appendChild(new Canvas());
-    }
+    startUpdate();
 
     document.getElementsByTagName('main')[0].style.display = 'block';
 } else {

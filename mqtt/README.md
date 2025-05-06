@@ -10,39 +10,40 @@ Robomotion uses Netpie as an MQTT broker for robot-server communication.
 
 ## Interface List
 
-- [Location Broadcasting](#location%20broadcasting)
-- [Movement](#movement)
-- [Notification](#notification)
+-   [Location Broadcasting](#location%20broadcasting)
+-   [Movement](#movement)
+-   [Notification](#notification)
 
 ## Location Broadcasting
 
-- topic: @msg/location/{robot_id}
+-   topic: @msg/location/{robot_id}
 
 ```json
 {
-  "r": "robot_id_A",
-  "x": 101,
-  "y": 203,
-  "z": 0,
-  "h": 3599, // heading (0-3599)
-  "s": 60 // speed
+    "r": "robot_id_A",
+    "x": 101,
+    "y": 203,
+    "z": 0,
+    "h": 3599, // heading (0-3599)
+    "s": 60 // speed
 }
 ```
 
 ## Movement
 
-- topic: @msg/move/{robot_id}
+-   topic: @msg/move/{robot_id}
 
 ```text
-F | B | L | R
+F | B | L | R | S
 ```
 
 ## Notification
 
-- topic: @msg/noti/{robot_id}
+-   topic: @msg/noti/{robot_id}
 
 ```json
 {
-    "type": "obstacle" | "zone"
+    "r": "robot_id_A",
+    "t": "obstacle"
 }
 ```

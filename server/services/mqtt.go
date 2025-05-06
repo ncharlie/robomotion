@@ -14,18 +14,20 @@ import (
 )
 
 type MqttService struct {
-	logRepository *repositories.LogRepository
-	client        mqtt.Client
-	data          chan dto.Robot
-	notification  chan dto.Robot
+	logRepository  *repositories.LogRepository
+	notiRepository *repositories.NotificationRepository
+	client         mqtt.Client
+	data           chan dto.Robot
+	notification   chan dto.Notification
 }
 
-func NewMqttService(logRepository *repositories.LogRepository, client mqtt.Client) *MqttService {
+func NewMqttService(logRepository *repositories.LogRepository, notiRepository *repositories.NotificationRepository, client mqtt.Client) *MqttService {
 	s := MqttService{
-		logRepository: logRepository,
-		client:        client,
-		data:          make(chan dto.Robot, 200),
-		notification:  make(chan dto.Robot, 50),
+		logRepository:  logRepository,
+		notiRepository: notiRepository,
+		client:         client,
+		data:           make(chan dto.Robot, 200),
+		notification:   make(chan dto.Notification, 50),
 	}
 
 	utils.Subscribe(client, env.Get("mqtt.topic.location"), s.getLocationHandler())
@@ -52,7 +54,16 @@ func NewMqttService(logRepository *repositories.LogRepository, client mqtt.Clien
 					slog.Info("Decoded c location", "data", data)
 				}
 			case data := <-s.notification:
-				slog.Info("Decoded c noti", "data", data)
+				noti := entities.Notification{
+					RobotId: data.RobotId,
+					Type:    data.Type,
+				}
+
+				if err := notiRepository.Insert(&noti); err != nil {
+					slog.Error("Failed to insert noti", "error", err)
+				} else {
+					slog.Info("Decoded c noti", "noti", data)
+				}
 			}
 		}
 	}()
@@ -80,7 +91,7 @@ func (s *MqttService) getNotificationHandler() mqtt.MessageHandler {
 	return func(client mqtt.Client, msg mqtt.Message) {
 		slog.Info("Received message", "topic", msg.Topic(), "payload", string(msg.Payload()))
 
-		var data dto.Robot
+		var data dto.Notification
 		if err := json.Unmarshal(msg.Payload(), &data); err != nil {
 			slog.Error("Failed to decode message", "error", err)
 			return
@@ -93,4 +104,13 @@ func (s *MqttService) getNotificationHandler() mqtt.MessageHandler {
 		}
 		s.notification <- data
 	}
+}
+
+func (s *MqttService) MoveRobot(robotId string, dir dto.Direction) error {
+	if err := utils.Publish(s.client, env.Get("mqtt.topic.movement")+"/"+robotId, string(dir)); err != nil {
+		slog.Error("Publish error", "error", err)
+		return err
+	}
+
+	return nil
 }

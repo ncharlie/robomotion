@@ -10,16 +10,7 @@ function login(event) {
         })
     }).then((response) => {
         if (response.ok) {
-            document.querySelector('.login-btn').style.display = 'none';
-
-            const body = document.getElementById('home-content');
-            if (body) {
-                body.appendChild(new Control());
-                body.appendChild(new Canvas());
-            }
-
-            document.getElementsByTagName('main')[0].style.display = 'block';
-            document.body.classList.toggle('show-popup');
+            location.reload();
         } else {
             alert('Login failed. Please try again.');
         }

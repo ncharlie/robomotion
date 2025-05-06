@@ -157,7 +157,7 @@ class Control extends HTMLElement {
                 <span>degree</span>
             </div>
             <!-- Control Section -->
-            <div class="arrow-controls" hidden>
+            <div class="arrow-controls">
                 <div class="arrow-row">
                     <button id="forward">↑ Forward</button>
                 </div>
@@ -171,7 +171,7 @@ class Control extends HTMLElement {
                 </div>
             </div>
             <!-- Notifications Section -->
-            <div class="notifications-container" hidden>
+            <div class="notifications-container">
                 <template>
                     <div class="notification">
                         <div class="alert-logo">!</div>
