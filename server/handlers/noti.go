@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func (h *APIHandler) GetParams(w http.ResponseWriter, r *http.Request) {
+func (h *APIHandler) GetNoti(w http.ResponseWriter, r *http.Request) {
 	logger := slog.With("from", utils.GetIP(r), "url", r.URL)
 	logger.Info("Incoming", "proto", r.Proto, "host", r.Host, "agent", utils.GetAgent(r))
 
@@ -33,6 +33,8 @@ func (h *APIHandler) GetParams(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	lastCheck := time.Now()
+
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Expose-Headers", "Content-Type")
 
@@ -44,7 +46,7 @@ func (h *APIHandler) GetParams(w http.ResponseWriter, r *http.Request) {
 
 	clientGone := r.Context().Done()
 
-	t := time.NewTicker(time.Second)
+	t := time.NewTicker(2 * time.Second)
 	defer t.Stop()
 	rc := http.NewResponseController(w)
 
@@ -55,7 +57,7 @@ func (h *APIHandler) GetParams(w http.ResponseWriter, r *http.Request) {
 			t.Stop()
 			return
 		case <-t.C:
-			data, err := h.Service.GetLocation(robotId)
+			data, err := h.Service.GetNotification(robotId, &lastCheck)
 			if err != nil {
 				logger.Error("failed to get location", "error", err)
 				continue
@@ -67,14 +69,14 @@ func (h *APIHandler) GetParams(w http.ResponseWriter, r *http.Request) {
 					logger.Error("failed to marshal data", "error", err)
 					continue
 				}
-				if _, err = fmt.Fprintf(w, "event: Location\ndata: %s\n\n", (string)(jsonData)); err != nil {
+				if _, err = fmt.Fprintf(w, "event: Notification\ndata: %s\n\n", (string)(jsonData)); err != nil {
 					return
 				}
 				if err = rc.Flush(); err != nil {
 					return
 				}
+				lastCheck = data.TimeStamp
 			}
-
 		}
 	}
 }

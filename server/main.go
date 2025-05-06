@@ -46,6 +46,7 @@ func main() {
 	// r.HandleFunc("/search/{searchTerm}", Search)
 	r.HandleFunc("/auth", handler.Auth).Methods("POST")
 	r.HandleFunc("/update", handler.GetParams).Methods("GET")
+	r.HandleFunc("/noti", handler.GetNoti).Methods("GET")
 	static := http.StripPrefix("/static/", http.FileServer(http.Dir("./static/")))
 	r.PathPrefix("/static/").Handler(static)
 
@@ -73,7 +74,7 @@ func main() {
 		}
 	}()
 
-	slog.Info("start listening http1 on 0.0.0.0:" + env.Get("app.port"))
+	slog.Info("start listening https on 0.0.0.0:" + env.Get("app.port"))
 	if err := server.ListenAndServeTLS(env.Get("tls.cert"), env.Get("tls.key")); err != nil && err != http.ErrServerClosed {
 		slog.Error("Error starting server", "error", err)
 		log.Fatal(err)

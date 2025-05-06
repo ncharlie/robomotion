@@ -38,6 +38,29 @@ func (r *NotificationRepository) Insert(noti *entities.Notification) error {
 	return err
 }
 
+func (r *NotificationRepository) GetNotification(id string, last *time.Time) *entities.Notification {
+	var ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	opt := options.FindOne().SetSort(bson.M{"created_at": 1})
+	filter := bson.M{
+		"robot_id": id,
+		"created_at": bson.M{
+			"$gt": last,
+		},
+	}
+
+	var noti entities.Notification
+	if err := r.collection.FindOne(ctx, filter, opt).Decode(&noti); err != nil {
+		if err != mongo.ErrNoDocuments {
+			slog.Error("Error getting notification", "error", err)
+		}
+		return nil
+	}
+
+	return &noti
+}
+
 func (r *NotificationRepository) CreateIndex() error {
 	var ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
