@@ -5,6 +5,7 @@
 #include "dout.h"
 #include "motion.h"
 #include "speed.h"
+#include "ultrasonic.h"
 
 int main() {
     init();
@@ -25,12 +26,15 @@ int main() {
     unsigned long now = 0;
     unsigned long lastUpdate10ms = 0;  // last time the input pin was triggered
     unsigned long lastUpdate50ms = 0;
-    unsigned long lastUpdate100ms = 0;  // last time the input pin was triggered
+    unsigned long lastUpdate100ms = 0;   // last time the input pin was triggered
     unsigned long lastUpdate1500ms = 0;  // last time the input pin was triggered
     unsigned long commandTrigger = 0;
+
     int targetHeading = -1;
-    int spinned = 0;
-    int waited = 0;
+    int bearingAdjustPhase = 0;
+    unsigned long lastBearingAdjust = 0;
+    unsigned long lastBearingWait = 0;
+    unsigned long bearingAdjustDelay = 0;
 
     Serial.begin(9600);
     Serial3.begin(115200);
@@ -48,49 +52,14 @@ int main() {
 
         if (now - lastUpdate100ms >= 100) {  // run every 100 ms
             rover.controlSpeed();
+            ultrasonic.measure();
             lastUpdate100ms = millis();
-        }
-
-        if (now - lastUpdate50ms >= 50) {  // run every 50 ms
-            lastUpdate50ms = millis();
-            if (targetHeading != -1) {
-                unsigned long lastBearingAdjust = 0;
-                
-                for(;targetHeading != -1;) {
-                    compass.update();
-                    int current = compass.read();
-                    if (current < 0) break;
-                
-                    int diff = targetHeading - current;
-                    if (diff > 1800) diff -= 3600;
-                    else if (diff < -1800) diff += 3600;
-                    
-                    int aDiff = abs(diff);
-                    
-                    if (aDiff < 450) rover.setSpeed(1);
-                    else rover.setSpeed(2);
-                    if (aDiff < 25) {
-                        rover.setDirection(STOP);
-                        targetHeading = -1;
-                    } else if (diff > 0) {
-                        rover.setDirection(RIGHTTURN);
-                    } else {
-                        rover.setDirection(LEFTTURN);
-                    }
-
-                    rover.setSpeed(spdLevel);
-                    delay((5*aDiff)/6);
-                    rover.setDirection(STOP);
-                    compass.update();
-                    delay(500);
-                }
-            }
         }
 
         if (now - lastUpdate1500ms >= 1500) {  // run every 1.5 second
             char log[100];
-            sprintf(log, "Heading: %d\tFront: %lu-%lu\tBack : %lu-%lu", compass.read(), rover.flSpd.getSpeed(), rover.frSpd.getSpeed(), rover.rlSpd.getSpeed(), rover.rrSpd.getSpeed());
-            Serial.print(log);
+            // sprintf(log, "Heading: %d\tFront: %lu-%lu\tBack : %lu-%lu", compass.read(), rover.flSpd.getSpeed(), rover.frSpd.getSpeed(), rover.rlSpd.getSpeed(), rover.rrSpd.getSpeed());
+            // Serial.print(log);
 
             uint16_t fl = OCR4B;
             uint16_t fr = OCR1A;
@@ -99,16 +68,66 @@ int main() {
 
             // sprintf(log, "Speed regis\tFront: %hu-%hu\n\t\tBack : %hu-%hu\n", fl, fr, rl, rr);
             sprintf(log, "Speed regis\tFront: %hu-%hu\tBack : %hu-%hu\n", OCR4B, OCR1A, OCR4C, OCR1B);
-            Serial.print(log);
+            // Serial.print(log);
 
             char message[16];
             sprintf(message, "%lu,%d,%d\0", rover.frSpd.getSpeed(), compass.read(), false);
             Serial3.print(message);
 
+            // ultrasonic.read(0);
+            // sprintf(log, "Front: %d\n", ultrasonic.read(0));
+            sprintf(log, "Front: %d\tBack: %d\tLeft: %d\tRight: %d\n", ultrasonic.read(0), ultrasonic.read(1), ultrasonic.read(2), ultrasonic.read(3));
+            Serial.print(log);
+
             lastUpdate1500ms = millis();
         }
 
         bool ledOn = true;
+
+        if (targetHeading != -1) {
+            if (bearingAdjustPhase == 0) {  // Initial phase, not moving
+                int current = compass.read();
+                if (current >= 0) {
+                    int diff = targetHeading - current;
+                    if (diff > 1800)
+                        diff -= 3600;
+                    else if (diff < -1800)
+                        diff += 3600;
+
+                    int aDiff = abs(diff);
+
+                    rover.setSpeed(2);
+                    if (aDiff < 25) {
+                        rover.setDirection(STOP);
+                        Serial.println("-----SUCCESS----");
+                        targetHeading = -1;
+                    } else if (diff > 0) {
+                        rover.setDirection(RIGHTTURN);
+                        Serial.print("-----MOVE RIGHT---- for:");
+                    } else {
+                        rover.setDirection(LEFTTURN);
+                        Serial.print("-----MOVE LEFT---- for:");
+                    }
+
+                    bearingAdjustDelay = (5 * aDiff) / 6;
+                    lastBearingAdjust = millis();
+                    bearingAdjustPhase = 1;
+                    Serial.println(bearingAdjustDelay);
+                }
+            } else if (bearingAdjustPhase == 1) {  // Adjusting phase
+                if (millis() - lastBearingAdjust >= bearingAdjustDelay) {
+                    rover.setDirection(STOP);
+                    Serial.println("-----STOP----");
+                    lastBearingWait = millis();
+                    bearingAdjustPhase = 2;
+                }
+            } else if (bearingAdjustPhase == 2) {  // Delaying phase
+                if (millis() - lastBearingWait >= 500) {
+                    bearingAdjustPhase = 0;
+                    Serial.println("-----DONE----");
+                }
+            }
+        }
 
         if (Serial3.available()) {
             // if (Serial.available()) {
@@ -128,7 +147,6 @@ int main() {
             } else if (command.equals("ST")) {
                 rover.setDirection(STOP);
                 targetHeading = -1;
-                spinned =0 ;
             } else if (command.equals("FW")) {
                 rover.setDirection(FORWARD);
             } else if (command.equals("BW")) {
