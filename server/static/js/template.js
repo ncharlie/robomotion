@@ -33,8 +33,10 @@ if (id != -1) {
     const loginBtn = document.querySelector('.login-btn');
     loginBtn.style.display = 'none';
 
-    startUpdate();
-
+    if (document.getElementById('home-content')) {
+        startUpdate();
+        startNoti();
+    }
     document.getElementsByTagName('main')[0].style.display = 'block';
 } else {
     document.body.classList.toggle('show-popup');

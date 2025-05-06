@@ -20,7 +20,7 @@ Robomotion uses Netpie as an MQTT broker for robot-server communication.
 
 ```json
 {
-    "r": "robot_id_A",
+    "r": "r1",
     "x": 101,
     "y": 203,
     "z": 0,
@@ -43,7 +43,7 @@ F | B | L | R | S
 
 ```json
 {
-    "r": "robot_id_A",
+    "r": "r1",
     "t": "obstacle"
 }
 ```

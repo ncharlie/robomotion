@@ -172,11 +172,11 @@ class Control extends HTMLElement {
             </div>
             <!-- Notifications Section -->
             <div class="notifications-container">
-                <template>
+                <template id="notification-template">
                     <div class="notification">
                         <div class="alert-logo">!</div>
                         <div class="notification-content">
-                            <div class="notification-title">Notification Title 1</div>
+                            <div class="notification-title">Obstacle detected</div>
                             <div class="notification-timestamp">2025-05-06 12:34:56</div>
                             <div class="notification-message">This is the first notification message.</div>
                         </div>

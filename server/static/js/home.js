@@ -55,3 +55,28 @@ function move(direction) {
         }
     });
 }
+
+function addNotification(e) {
+    const data = JSON.parse(e.data);
+
+    const controlRoot =
+        document.getElementsByTagName('control-module')[0].shadowRoot;
+    const template = controlRoot.querySelector('#notification-template');
+
+    const clone = template.content.cloneNode(true);
+    // Update notification content
+    clone.querySelector('.notification-timestamp').textContent = data.ts;
+    clone.querySelector('.notification-message').textContent =
+        'Robot ' + data.r + ' encountered an obstacle';
+
+    // Append to the notifications container
+    const container = controlRoot.querySelector('.notifications-container');
+    container.appendChild(clone);
+}
+
+function startNoti() {
+    const evtSource = new EventSource('/noti?id=r1', {
+        withCredentials: true
+    });
+    evtSource.addEventListener('Notification', addNotification);
+}
