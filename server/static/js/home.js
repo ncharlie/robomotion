@@ -36,3 +36,22 @@ function startUpdate() {
     });
     evtSource.addEventListener('Location', locationUpdate);
 }
+
+function move(direction) {
+    fetch('/move', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            robotId: 'r1',
+            direction: direction
+        })
+    }).then((response) => {
+        if (response.ok) {
+            // console.log(`Moved ${direction}`);
+        } else {
+            console.error('Error moving robot:', response.statusText);
+        }
+    });
+}

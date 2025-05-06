@@ -1,14 +1,16 @@
 # Robomotion
 
-Robomotion is a robot monitoring and control solution designed for indoor environments. The system utilizes beacons signal strength to identify the robot position.
+Robomotion is a robot monitoring and control solution designed for indoor
+environments. The system utilizes beacons signal strength to identify the robot
+position.
 
 ## Table of Contents
 
-- [Features](#features)
-- [Timeline](#timeline)
-- [System](#system)
-- [Installation](#installation)
-- [Usage](#usage)
+-   [Features](#features)
+-   [Timeline](#timeline)
+-   [System](#system)
+-   [Installation](#installation)
+-   [Usage](#usage)
 
 ## Features
 
@@ -92,6 +94,11 @@ A visual representation of the project's architecture.
 3. Test 4 ultrasonic sensors (60001)
 
 #### Week 11 (Apr 28)
+
+1. Set up testing environment
+2. Test controlling the robot via web UI
+
+#### Week 12 (May 05)
 
 1. Set up testing environment
 2. Test controlling the robot via web UI

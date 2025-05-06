@@ -3,9 +3,9 @@ package dto
 type Direction string
 
 const (
-	Forward  Direction = "F"
-	Backward Direction = "B"
-	Left     Direction = "L"
-	Right    Direction = "R"
-	Stop     Direction = "S"
+	Forward  Direction = "FW"
+	Backward Direction = "BW"
+	Left     Direction = "LW"
+	Right    Direction = "RW"
+	Stop     Direction = "ST"
 )

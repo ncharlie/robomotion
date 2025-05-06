@@ -159,15 +159,15 @@ class Control extends HTMLElement {
             <!-- Control Section -->
             <div class="arrow-controls">
                 <div class="arrow-row">
-                    <button id="forward">↑ Forward</button>
+                    <button id="forward" onclick="move('f')">↑ Forward</button>
                 </div>
                 <div class="arrow-row">
-                    <button id="leftward">← Left</button>
-                    <button id="stop">■ Stop</button>
-                    <button id="rightward">→ Right</button>
+                    <button id="leftward" onclick="move('l')">← Left</button>
+                    <button id="stop" onclick="move('s')">■ Stop</button>
+                    <button id="rightward" onclick="move('r')">→ Right</button>
                 </div>
                 <div class="arrow-row">
-                    <button id="backward">↓ Backward</button>
+                    <button id="backward" onclick="move('b')">↓ Backward</button>
                 </div>
             </div>
             <!-- Notifications Section -->
@@ -197,21 +197,6 @@ class Control extends HTMLElement {
                 elem.firstChild.href = '#';
             }
         }
-    }
-
-    fetchData() {
-        // Fetch data from the server
-        fetch('/api/control')
-            .then((response) => response.json())
-            .then((data) => {
-                // Update the UI with the fetched data
-                this.shadowRoot.querySelector('#robot-id').value = data.robotId;
-                this.shadowRoot.querySelector('#x').value = data.x;
-                this.shadowRoot.querySelector('#y').value = data.y;
-                this.shadowRoot.querySelector('#speed').value = data.speed;
-                this.shadowRoot.querySelector('#heading').value = data.heading;
-            })
-            .catch((error) => console.error('Error fetching data:', error));
     }
 
     handleNoAuth(e) {

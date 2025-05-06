@@ -5,11 +5,13 @@ import (
 )
 
 type APIHandler struct {
-	Service *services.Service
+	Service     *services.Service
+	MqttService *services.MqttService
 }
 
-func NewSubscribeHandler(service *services.Service) *APIHandler {
+func NewSubscribeHandler(service *services.Service, mqttService *services.MqttService) *APIHandler {
 	return &APIHandler{
-		Service: service,
+		Service:     service,
+		MqttService: mqttService,
 	}
 }
