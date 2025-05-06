@@ -1,37 +1,40 @@
-const navbarMenu = document.querySelector(".navbar .links");
-const hamburgerBtn = document.querySelector(".hamburger-btn");
-const hideMenuBtn = navbarMenu.querySelector(".close-btn");
-const showPopupBtn = document.querySelector(".login-btn");
-const formPopup = document.querySelector(".form-popup");
-const hidePopupBtn = formPopup.querySelector(".close-btn");
-const signupLoginLink = formPopup.querySelectorAll(".bottom-link a");
+const navbarMenu = document.querySelector('.navbar .links');
+const hamburgerBtn = document.querySelector('.hamburger-btn');
+const hideMenuBtn = navbarMenu.querySelector('.close-btn');
+const showPopupBtn = document.querySelector('.login-btn');
+const formPopup = document.querySelector('.form-popup');
+const hidePopupBtn = formPopup.querySelector('.close-btn');
+const signupLoginLink = formPopup.querySelectorAll('.bottom-link a');
 // Show mobile menu
-hamburgerBtn.addEventListener("click", () => {
-  navbarMenu.classList.toggle("show-menu");
+hamburgerBtn.addEventListener('click', () => {
+    navbarMenu.classList.toggle('show-menu');
 });
 // Hide mobile menu
-hideMenuBtn.addEventListener("click", () => hamburgerBtn.click());
+hideMenuBtn.addEventListener('click', () => hamburgerBtn.click());
 // Show login popup
-showPopupBtn.addEventListener("click", () => {
-  document.body.classList.toggle("show-popup");
+showPopupBtn.addEventListener('click', () => {
+    document.body.classList.toggle('show-popup');
 });
 // Hide login popup
-hidePopupBtn.addEventListener("click", () => showPopupBtn.click());
+hidePopupBtn.addEventListener('click', () => showPopupBtn.click());
 // Show or hide signup form
 signupLoginLink.forEach((link) => {
-  link.addEventListener("click", (e) => {
-    e.preventDefault();
-    formPopup.classList[link.id === "signup-link" ? "add" : "remove"](
-      "show-signup"
-    );
-  });
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        formPopup.classList[link.id === 'signup-link' ? 'add' : 'remove'](
+            'show-signup'
+        );
+    });
 });
 
-const cookies = document.cookie.split("; ");
-const id = cookies.findIndex((cookie) => cookie.startsWith("sessionCheck="));
+const cookies = document.cookie.split('; ');
+const id = cookies.findIndex((cookie) => cookie.startsWith('sessionCheck='));
 if (id != -1) {
-  const loginBtn = document.querySelector(".login-btn");
-  loginBtn.style.display = "none";
+    const loginBtn = document.querySelector('.login-btn');
+    loginBtn.style.display = 'none';
+
+    document.getElementsByTagName('control-module')[0].style.display = 'block';
+    document.getElementsByTagName('map-module')[0].style.display = 'block';
 } else {
-  document.body.classList.toggle("show-popup");
+    document.body.classList.toggle('show-popup');
 }
