@@ -34,7 +34,27 @@
         </header>
         <main>
             <p>History</p>
-            <div id="history-content"></div>
+            <div id="history-content">
+                <div class="table-container" style="overflow-x: auto">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Index</th>
+                                <th style="width: 188px">Timestamp</th>
+                                <th style="width: 45px">X</th>
+                                <th style="width: 45px">Y</th>
+                                <th>Heading</th>
+                                <th>Speed</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table"></tbody>
+                    </table>
+                </div>
+                <div class="pagination">
+                    <button onclick="prevPage()">Previous</button>
+                    <button onclick="nextPage()">Next</button>
+                </div>
+            </div>
         </main>
         <div class="blur-bg-overlay"></div>
         <div class="form-popup">
