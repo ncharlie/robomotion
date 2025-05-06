@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Loot Box Admin</title>
+		<link rel="icon" type="image/png" href="images/icon.webp" />
+		<link rel="stylesheet" href="css/style.css" />
+		<link rel="stylesheet" href="css/result.css" />
+	</head>
+	<body>
+		<div id="loot_box_content" class="row">
+			<div class="sidebar column">
+				<div class="switchMode">
+					<p id="switch_mode">Mode</p>
+					<server-mode-ctrl></server-mode-ctrl>
+				</div>
+
+				<a href="#" id="lootbox-Management">Manage Items</a>
+				<a href="check">Test Loot Box</a>
+				<a href="setting">Settings</a>
+			</div>
+			<div id="main" class="content-area">
+				<h1 class="header-txt">Lootbox Management</h1>
+				<!-- <h1>Manage loot box items</h1> -->
+				<div class="h_line"></div>
+				<h2 class="headerContent-txt">
+					Loot boxes
+					<button class="button buttonClearCache" onclick="refresh_clear_cache()">
+						refresh
+					</button>
+				</h2>
+				<div class="content-body column">
+					<div class="row">
+						<div id="lootboxList">
+							<div class="row space-Between">
+								<input type="text" class="search" placeholder="Search Shortcode" />
+								<!-- <button class="create" onclick="loot_box_clicked(event)">Create</button> -->
+
+								<button class="create" onclick="loot_box_clicked_create(event)">
+									<!-- <button class="create" onclick="location.href='#modal-createBox'"> -->
+									<div class="icon add-icon"></div>
+								</button>
+								<button class="button buttonDelete" onclick="delete_box()">
+									<div class="icon delete-icon"></div>
+								</button>
+							</div>
+							<p id="headLootboxList">Shortcode</p>
+							<div class="lootboxList">
+								<ul id="loot_box_list"></ul>
+								<template id="loot_box_list_item">
+									<li></li>
+								</template>
+							</div>
+							<!-- <button onclick="loot_box_clicked(event)">Create new loot box</button><br /><br /> -->
+						</div>
+
+						<div id="boxInformation">
+							<p id="boxInformation">Box information</p>
+							<div class="h_line"></div>
+							<div class="row">
+								<div class="Ibox">
+									<label for="input_loot_box_id" class="label-text">Loot box id:</label>
+									<input id="input_loot_box_id_value" class="input input-infomation" disabled />
+								</div>
+								<div class="Ibox">
+									<label for="input_loot_box_short_code" class="label-text">Short code:</label>
+									<input id="input_loot_box_short_code" class="input input-infomation" disabled />
+								</div>
+								<div class="Ibox">
+									<label for="input_item_amounts" class="label-text">Item amount:</label>
+									<input id="input_item_amounts" class="input input-infomation" disabled />
+								</div>
+							</div>
+							<div class="row flex-start marginT1em">
+								<div class="body-left">
+									<table id="box_rate_table">
+										<thead>
+											<tr>
+												<th id="TH_rate">Rate</th>
+												<th id="TH_name">Name</th>
+												<th id="TH_drop">Drop rate</th>
+												<th id="TH_dup">Duplicate rate [ % ]</th>
+												<th id="TH_Guaran">Guarantee every</th>
+												<th id="TH_color">Legend</th>
+											</tr>
+										</thead>
+										<tbody></tbody>
+									</table>
+								</div>
+								<div class="body-right">
+									<div id="addRarity"></div>
+									<!-- <button class="button buttonRate" onclick="add_rarity(event)">Add Rarity Rates</button> -->
+
+									<!-- <div class="column">
+										<div class="row input-checkbox">
+											<input
+												type="checkbox"
+												id="input_item_filter_enable"
+												oninput="filter_item_list_view()"
+												checked
+											>
+											<label for="input_item_filter_enable" class="label-checkbox"> Show live </label>
+
+										</div>
+
+										<div class="row input-checkbox">
+											<input
+												type="checkbox"
+												id="input_item_filter_disable"
+												oninput="filter_item_list_view()"
+												checked
+											>
+											<label for="input_item_filter_disable" class="label-checkbox"> Show test </label>
+										</div>
+									</div> -->
+								</div>
+							</div>
+							<div class="row space-Between marginT1em">
+								<input
+									type="text"
+									id="item_search"
+									class="search"
+									placeholder="Search Shortcode"
+									oninput="filter_item_list_view()"
+								/>
+								<button class="button buttonAdd" onclick="add_item()">Add Item</button>
+								<button onclick="sync_items_name()" id="sync-item-name-button" class="button">
+									Sync item name
+								</button>
+								<button class="button buttonDeleteAll" onclick="delete_all_items()">
+									Delete All Item
+								</button>
+							</div>
+							<div class="item-list">
+								<!-- <select id="loot_box_items_list" size="10" onchange="update_item_view(event)"></select> -->
+								<ul id="loot_box_items_list"></ul>
+							</div>
+							<p id="item_result"></p>
+							<div class="column">
+								<p id="importJSON">Import Item from file</p>
+								<div class="row">
+									<div class="upload-file">
+										<input
+											type="file"
+											id="file_to_import"
+											accept=".csv,.json"
+											class="input-file"
+											onchange="mapNamefile()"
+										/>
+										<span id="upload-file-text" class="upload_text">No file choosen, yet.</span>
+									</div>
+									<button onclick="add_items()" id="import-button">Import</button>
+
+									<!-- <button onclick="convert_items(true)" class="button buttonConvert">
+										<div class="icon convert-icon"></div><span>live</span>
+									</button> -->
+									<!-- <button onclick="convert_items(false)" class="button buttonConvert">
+										<div class="icon convert-icon"></div><span>Preview</span>
+									</button> -->
+									<button onclick="export_data()" class="button buttonExport">Export</button>
+								</div>
+							</div>
+							<p id="import_result"></p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!------------------- Create Box modal ------------->
+
+		<a href="#" class="modal" id="modal-createBox" aria-hidden="true"></a>
+		<div class="modal-dialog">
+			<div class="modal-header">
+				<p id="boxInformation-model">Box Information</p>
+				<a href="#" class="btn-close" aria-hidden="true">&times;</a>
+			</div>
+			<div class="modal-body">
+				<div class="row space-Between marginB05em">
+					<!-- <div class="column marginR005em"> -->
+					<label for="new_loot_box_short_code" class="label-text">Short code</label>
+					<input id="new_loot_box_short_code" class="input" />
+					<!-- </div> -->
+					<!-- <div class="column">
+						<label for="new_loot_box_id" class="label-text">Key</label>
+						<input id="new_loot_box_id" class="input" />
+					</div> -->
+				</div>
+				<div class="row space-Between">
+					<label for="price" class="label-text row marginB05em">Prices</label>
+				</div>
+				<div class="row price-blocks space-Between marginB05em">
+					<div class="column width100">
+						<div id="loot_box_price_list"></div>
+						<div class="row marginB05em">
+							<button class="input" onclick="add_price_block()">Add Price</button>
+						</div>
+					</div>
+					<template id="loot_box_price_item_list_template">
+						<div class="loot_box_price_item_list_wrap">
+							<div class="row">
+								<div class="column marginR005em">
+									<button class="button buttonDelete" onclick="del_price_block(this)">✗</button>
+								</div>
+								<div class="column">
+									<label class="label-text">Price</label>
+								</div>
+								<!-- <div class="column marginR005em" style="width: 35%">
+									<label for="input_price_item_code" class="label-text"> Short code</label>
+								</div>
+								<div class="column marginR005em" style="width: 35%">
+									<label for="input_price_item_amount" class="label-text"> Amount</label>
+								</div> -->
+							</div>
+							<div class="row">
+								<div class="column width100"></div>
+								<button class="input marginR005em unit-label" onclick="add_price_item(this)">+</button>
+							</div>
+						</div>
+					</template>
+					<template id="loot_box_price_item_template">
+						<div class="row space-Between loot_box_price_item_wrap">
+							<div class="column marginL05em marginR005em width100">
+								<input
+									list="currency_datalist"
+									id="input_price_item_code"
+									class="input price_code"
+									placeholder="short_code"
+								/>
+							</div>
+							<div class="column marginR005em">
+								<input
+									type="number"
+									id="input_price_item_amount"
+									class="input price_amount"
+									placeholder="amount"
+								/>
+							</div>
+							<div class="column">
+								<button class="input marginR005em unit-label" onclick="del_price_item(this)">-</button>
+							</div>
+						</div>
+					</template>
+				</div>
+
+				<div class="row space-Between marginT05em">
+					<label class="column label-text" for="new_box_unique">Unique</label>
+					<div class="row input-currency width100">
+						<input type="checkbox" id="new_box_unique" name="unique" />
+					</div>
+				</div>
+				<div class="row space-Between marginT1em">
+					<div class="column marginR005em">
+						<label for="new_loot_box_start" class="label-text">Start Date (UTC)</label>
+						<input
+							id="new_loot_box_start"
+							class="input"
+							type="datetime-local"
+							min="2022-12-01T00:00"
+							max="2026-01-01T00:00"
+						/>
+					</div>
+					<div class="column">
+						<label for="new_loot_box_end" class="label-text">End Date (UTC)</label>
+						<input
+							id="new_loot_box_end"
+							class="input"
+							type="datetime-local"
+							min="2022-12-01T00:00"
+							max="2026-01-01T00:00"
+						/>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<p id="box_result"></p>
+				<button class="button buttonSave" onclick="save_box()">Save</button>
+			</div>
+		</div>
+
+		<!------------------- Create Rarity Rates modal ------------->
+		<a href="#" class="modal" id="modal-createRate" aria-hidden="true"></a>
+		<div class="modal-dialog">
+			<div class="modal-header">
+				<p id="boxInformation-model">Add Rarity Rates</p>
+				<a href="#" class="btn-close" aria-hidden="true">&times;</a>
+			</div>
+			<div class="modal-body">
+				<div class="row space-Between">
+					<div class="column marginR005em">
+						<label for="input_rarity_name" class="label-text"> Name </label>
+						<input id="input_rarity_name" class="input" />
+					</div>
+					<div class="column">
+						<label for="input_rarity_rate" class="label-text">Rate </label>
+						<input type="number" id="input_rarity_rate" class="input" />
+					</div>
+				</div>
+				<div class="row space-Between">
+					<div class="column marginR005em">
+						<label for="input_rarity_percent" class="label-text">Percentage [ Weight ]</label>
+						<input type="number" id="input_rarity_percent" class="input" />
+					</div>
+					<div class="column">
+						<label for="input_rarity_dup" class="label-text">Duplicate % [ 0-100 ] </label>
+						<input type="number" id="input_rarity_dup" class="input" />
+					</div>
+				</div>
+				<div class="row space-Between">
+					<div class="column marginR005em">
+						<label for="input_rarity_fix" class="label-text">Guarantee every</label>
+						<input type="number" id="input_rarity_fix" class="input" />
+					</div>
+				</div>
+
+				<!-- <div id="list_of_rarity"></div> -->
+
+				<table id="rarity_list">
+					<thead>
+						<tr>
+							<th>Rate</th>
+							<th id="TH-rarity-name">Name</th>
+							<th>Drop</th>
+							<th>Duplicate</th>
+							<th>Guarantee</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+			<div class="modal-footer">
+				<p id="rarity_result"></p>
+				<button class="button buttonSave" onclick="save_rarity('add')">Save</button>
+			</div>
+		</div>
+
+		<!------------------- Edit Rarity Rates modal ------------->
+		<a href="#" class="modal" id="modal-EditRate" aria-hidden="true"></a>
+		<div class="modal-dialog">
+			<div class="modal-header">
+				<p id="boxInformation-model">Edit Rarity Rates</p>
+				<a href="#" class="btn-close" aria-hidden="true">&times;</a>
+			</div>
+			<div class="modal-body">
+				<div class="row space-Between">
+					<div class="column marginR005em">
+						<label for="input_rarity_name" class="label-text"> Name </label>
+						<input id="input_rarity_name_edit" class="input" />
+					</div>
+					<div class="column">
+						<label for="input_rarity_rate" class="label-text">Rate </label>
+						<input type="number" id="input_rarity_rate_edit" class="input" />
+					</div>
+				</div>
+				<div class="row space-Between">
+					<div class="column marginR005em">
+						<label for="input_rarity_percent" class="label-text">Percentage [ Weight ]</label>
+						<input type="number" id="input_rarity_percent_edit" class="input" />
+					</div>
+					<div class="column">
+						<label for="input_rarity_dup" class="label-text">Duplicate % [ 0-100 ] </label>
+						<input type="number" id="input_rarity_dup_edit" class="input" />
+					</div>
+				</div>
+				<div class="row space-Between">
+					<div class="column marginR005em">
+						<label for="input_rarity_fix" class="label-text">Guarantee every</label>
+						<input type="number" id="input_rarity_fix_edit" class="input" />
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer-edit">
+				<p id="rarity_result"></p>
+				<button class="button buttonSave marginR005em" onclick="save_rarity('edit')">Save</button>
+				<button class="button" onclick="delete_rarity()">Delete</button>
+			</div>
+		</div>
+
+		<!------------------- Add Item modal ------------->
+		<a href="#" class="modal" id="modal-AddItem" aria-hidden="true"></a>
+		<div class="modal-dialog">
+			<div class="modal-header">
+				<p id="boxInformation-model">Item</p>
+				<a href="#" class="btn-close" aria-hidden="true">&times;</a>
+			</div>
+			<div class="modal-body">
+				<div class="row space-Between marginB05em">
+					<div class="column marginR005em hidden">
+						<label for="input_item_id" class="label-text"> ID</label>
+						<input id="input_item_id" class="input" disabled />
+					</div>
+					<div class="column marginR005em">
+						<label for="input_item_code" class="label-text"> Short code</label>
+						<input id="input_item_code" class="input" />
+					</div>
+					<div class="column">
+						<label for="input_item_amount" class="label-text"> Amount </label>
+						<input type="number" id="input_item_amount" class="input" />
+					</div>
+				</div>
+
+				<div class="row space-Between marginB05em">
+					<div class="column marginR005em">
+						<label for="input_item_rate" class="label-text">Rarity</label>
+						<input list="rarity_datalist" id="input_item_rate" class="input" />
+					</div>
+					<div class="column">
+						<label for="input_item_weight" class="label-text">Probability [ Weight ] </label>
+						<input type="number" id="input_item_weight" class="input" />
+					</div>
+				</div>
+
+				<div class="row space-Between marginB05em">
+					<div class="column marginR005em">
+						<label for="input_item_type" class="label-text"> Type</label>
+						<input list="item_type_datalist" name="browser" id="input_item_type" />
+					</div>
+					<div class="column">
+						<label for="input_item_name" class="label-text"> Name</label>
+						<input id="input_item_name" class="input" />
+					</div>
+				</div>
+
+				<!-- <div class="row marginT05em marginB05em">
+					<div class="row align-center marginR005em">
+						<input type="checkbox" id="input_item_enable" >
+						<label for="input_item_enable" class="label-checkbox"> Live</label>
+					</div>
+					<div class="row align-center">
+						<input type="checkbox" id="input_item_dup_enable" onclick="showEnable('add')" />
+						<label for="input_item_dup_enable" class="label-checkbox"> Enable Duplicate Exchange</label>
+					</div>
+				</div> -->
+				<div class="row space-Between marginB05em">
+					<div class="column marginR005em">
+						<label class="label-text"> Duplicate Exchange</label>
+						<div id="enable-duplicate"></div>
+					</div>
+				</div>
+
+				<template id="loot_item_duplicate_exchange_template">
+					<div class="duplicate_exchange_wrap">
+						<div class="row marginB05em">
+							<div class="column marginR005em">
+								<label for="input_item_dup_code" class="label-text">&nbsp;</label>
+								<button class="input" onclick="del_dup_block(this)">X</button>
+							</div>
+							<div class="column">
+								<label for="input_item_dup_code" class="label-text"> Short code</label>
+								<input id="input_item_dup_code" class="input de_code" />
+							</div>
+							<div class="column">
+								<label for="input_item_dup_amount" class="label-text"> Amount</label>
+								<input id="input_item_dup_amount" class="input de_amount" value="0" />
+							</div>
+						</div>
+						<div class="row marginB05em">
+							<div class="column width100">
+								<label for="input_item_dup_type" class="label-text"> Type</label>
+								<input list="item_type_datalist" id="input_item_dup_type" class="input de_type" />
+							</div>
+						</div>
+					</div>
+				</template>
+				<button class="input" onclick="add_dup_block()">+</button>
+			</div>
+			<div class="modal-footer row">
+				<p id="addItem_result"></p>
+				<div class="item_result">
+					<!-- <button onclick="sync_items_name()" id="sync-item-name-button" class="button"> Sync item name </button> -->
+					<!-- <button onclick="save_item()" class="button buttonSave"> Save </button> -->
+					<span id="save_button"></span>
+					<!-- <button onclick="delete_item()" id="delete-button-item" class="button"> Delete </button> -->
+				</div>
+			</div>
+		</div>
+
+		<datalist id="item_type_datalist">
+			<option value="lootbox"></option>
+			<option value="cosmetic"></option>
+			<option value="IAP"></option>
+			<option value="currency"></option>
+			<option value="profile"></option>
+			<option value="sticker"></option>
+			<option value="character"></option>
+			<option value="back"></option>
+			<option value="head"></option>
+			<option value="skin"></option>
+			<option value="bullet coin50"></option>
+		</datalist>
+
+		<datalist id="rarity_datalist">
+			<option value="1">Common</option>
+			<option value="2">Uncommon</option>
+			<option value="3">Rare</option>
+			<option value="4">Epic</option>
+			<option value="5">Legendary</option>
+		</datalist>
+
+		<datalist id="currency_datalist">
+			<option value="Coin"></option>
+			<option value="Marble"></option>
+			<option value="Candy"></option>
+		</datalist>
+	</body>
+	<script src="js/serverModeCtrl.js"></script>
+	<script src="js/item.js" async></script>
+	<script src="js/import-csv.js" async></script>
+	<script src="js/export-csv.js" async></script>
+</html>

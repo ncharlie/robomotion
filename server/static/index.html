@@ -3,118 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real-Time Robot Tracking</title>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background-color: #f3f3f3;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            overflow: hidden;
-        }
-        .floor-plan {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            background: url('map1.jpg') no-repeat center center;
-            background-size: cover;
-            border: none;
-        }
-        .robot-label {
-            position: absolute;
-            top: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 12px;
-            font-weight: bold;
-            color: white;
-            background: black;
-            padding: 2px 5px;
-            border-radius: 3px;
-        }
-        .robot {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            position: absolute;
-            transition: top 0.3s, left 0.3s;
-        }
-        #robot1 {
-            background-color: blue;
-            top: 200px;
-            left: 200px;
-        }
-        #robot2 {
-            background-color: red;
-            top: 63%;
-            left: 81%;
-        }
-        #robot3 {
-            background-color: orange;
-            top: 475px;
-            left: 500px;
-        }
-        .controls {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.8);
-            padding: 10px;
-            border-radius: 10px;
-        }
-        button {
-            padding: 10px 20px;
-            margin: 5px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-    </style>
+    <title>Robomotion</title>
+    <link rel="icon" type="image/png" href="images/logo.png">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,0,0">
+    <link rel="stylesheet" href="css/index.css">
+    <script src="js/template.js" defer></script>
 </head>
 <body>
-    <h1>Warehouse 85</h1>
-    <div class="floor-plan">
-        <div class="robot" id="robot1">
-            <div class="robot-label">Boxer</div>
-        </div>
-        <div class="robot" id="robot2">
-            <div class="robot-label">Napoleon</div>
-        </div>
-        <div class="robot" id="robot3">
-            <div class="robot-label">Squealer</div>
-        </div>
-    </div>
-    <div class="controls">
-        <button onclick="moveRobot('left')">←</button>
-        <button onclick="moveRobot('forward')">↑</button>
-        <button onclick="moveRobot('backward')">↓</button>
-        <button onclick="moveRobot('right')">→</button>
-    </div>
-    
-    <script>
-        let robot = document.getElementById("robot1");
-        let position = { x: 200, y: 200 };
-
-        function moveRobot(direction) {
-            if (direction === "forward") position.y -= 10;
-            if (direction === "backward") position.y += 10;
-            if (direction === "left") position.x -= 10;
-            if (direction === "right") position.x += 10;
+    <header>
+        <nav class="navbar">
+            <span class="hamburger-btn material-symbols-rounded">menu</span>
+            <a href="#" class="logo">
+                <img src="images/logo.png" alt="logo">
+                <h2>Robomotion</h2>
+            </a>
+            <ul class="links">
+                <span class="close-btn material-symbols-rounded">close</span>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">History</a></li>
+                <li><a href="#">About us</a></li>
+            </ul>
+            <button class="login-btn">LOG IN</button>
+        </nav>
+    </header>
+    <main>
+        <div class="content">
             
-            robot.style.left = position.x + "px";
-            robot.style.top = position.y + "px";
-        }
-
-        document.addEventListener("keydown", function(event) {
-            if (event.key === "ArrowUp") moveRobot("forward");
-            if (event.key === "ArrowDown") moveRobot("backward");
-            if (event.key === "ArrowLeft") moveRobot("left");
-            if (event.key === "ArrowRight") moveRobot("right");
-        });
-    </script>
+        </div>
+    </main>
+    <div class="blur-bg-overlay"></div>
+    <div class="form-popup">
+        <span class="close-btn material-symbols-rounded">close</span>
+        <div class="form-box login">
+            <div class="form-details">
+                <h2>Welcome</h2>
+                <p>Please log in to view data.</p>
+            </div>
+            <div class="form-content">
+                <h2>LOGIN</h2>
+                <form onsubmit="login(event)">
+                    <div class="input-field">
+                        <input type="text" name="username" required>
+                        <label>Username</label>
+                    </div>
+                    <div class="input-field">
+                        <input type="password" name="password" required>
+                        <label>Password</label>
+                    </div>
+                    <!-- <a href="#" class="forgot-pass-link">Forgot password?</a> -->
+                    <button type="submit">Log In</button>
+                </form>
+                <!-- <div class="bottom-link">
+                    Don't have an account?
+                    <a href="#" id="signup-link">Signup</a>
+                </div> -->
+            </div>
+        </div>
+        <div class="form-box signup">
+            <div class="form-details">
+                <h2>Create Account</h2>
+                <p>To become a part of our community, please sign up using your personal information.</p>
+            </div>
+            <div class="form-content">
+                <h2>SIGNUP</h2>
+                <form action="#">
+                    <div class="input-field">
+                        <input type="text" name="username" required>
+                        <label>Enter your email</label>
+                    </div>
+                    <div class="input-field">
+                        <input type="password" name="password" required>
+                        <label>Create password</label>
+                    </div>
+                    <div class="policy-text">
+                        <input type="checkbox" id="policy">
+                        <label for="policy">
+                            I agree the
+                            <a href="#" class="option">Terms & Conditions</a>
+                        </label>
+                    </div>
+                    <button type="submit">Sign Up</button>
+                </form>
+                <div class="bottom-link">
+                    Already have an account? 
+                    <a href="#" id="login-link">Login</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
+<script src="js/login.js"></script>
 </html>

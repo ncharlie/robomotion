@@ -1,11 +1,10 @@
 package handlers
 
 import (
+	"encoding/json"
 	"log/slog"
 	"net/http"
 	"robomotion/utils"
-
-	"github.com/goccy/go-json"
 )
 
 func (h *APIHandler) Auth(w http.ResponseWriter, r *http.Request) {
@@ -39,6 +38,14 @@ func (h *APIHandler) Auth(w http.ResponseWriter, r *http.Request) {
 		Secure:   true,
 		SameSite: http.SameSiteNoneMode,
 		MaxAge:   10800, // 3 hours
+	})
+	http.SetCookie(w, &http.Cookie{
+		Name:     "sessionCheck",
+		Value:    "true",
+		HttpOnly: false,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
+		MaxAge:   10000, // almost 3 hours
 	})
 	w.WriteHeader(http.StatusOK)
 }
