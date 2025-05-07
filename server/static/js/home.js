@@ -14,6 +14,9 @@ function locationUpdate(e) {
     const container = mapRoot.getElementById('container');
     const marker = mapRoot.getElementById('robota');
 
+    if (data.x < 0 || data.x > 200 || data.y < 0 || data.y > 200) {
+        return;
+    }
     // Scale the coordinate from [0,200] to [0, container width/height]
     const computedX = (data.x / 200) * container.clientWidth;
     const computedY = (data.y / 200) * container.clientHeight;
