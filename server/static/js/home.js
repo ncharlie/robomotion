@@ -1,3 +1,5 @@
+const lastUpdate = {};
+
 function dismissNotification(button) {
     // Get the parent notification element and remove it from the DOM
     const notification = button.parentElement;
@@ -28,6 +30,8 @@ function locationUpdate(e) {
     controlRoot.querySelector('#y').value = data.y;
     controlRoot.querySelector('#speed').value = data.s;
     controlRoot.querySelector('#heading').value = data.h;
+
+    lastUpdate[data.r] = Date.now();
 }
 
 function startUpdate() {
@@ -71,7 +75,7 @@ function addNotification(e) {
 
     // Append to the notifications container
     const container = controlRoot.querySelector('.notifications-container');
-    container.appendChild(clone);
+    container.insertBefore(clone, container.firstChild);
 }
 
 function startNoti() {
@@ -80,3 +84,38 @@ function startNoti() {
     });
     evtSource.addEventListener('Notification', addNotification);
 }
+
+setInterval(() => {
+    const now = Date.now();
+    for (const robotId in lastUpdate) {
+        if (now - lastUpdate[robotId] > 5000) {
+            const controlRoot =
+                document.getElementsByTagName('control-module')[0].shadowRoot;
+            const template = controlRoot.querySelector(
+                '#notification-template'
+            );
+
+            const clone = template.content.cloneNode(true);
+            // Update notification content
+            clone.querySelector('.notification-title').textContent =
+                'Robot offline';
+            clone.querySelector('.notification-timestamp').textContent =
+                new Date().toLocaleString();
+            clone.querySelector('.notification-message').textContent =
+                'Robot ' + robotId + ' disconnected';
+
+            // Append to the notifications container
+            const container = controlRoot.querySelector(
+                '.notifications-container'
+            );
+
+            container.insertBefore(clone, container.firstChild);
+
+            const mapRoot =
+                document.getElementsByTagName('map-module')[0].shadowRoot;
+            const marker = mapRoot.getElementById('robota');
+            marker.hidden = true;
+            delete lastUpdate[robotId];
+        }
+    }
+}, 2000);

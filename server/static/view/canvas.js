@@ -98,7 +98,7 @@ class Canvas extends HTMLElement {
         this.template.innerHTML = /* html */ `
         <div id="container">
             <div class="robot" id="robota" hidden>
-                <div class="robot-label">Robot1</div>
+                <div class="robot-label">r1</div>
             </div>
         </div>
     `;

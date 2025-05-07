@@ -51,7 +51,7 @@ func (r *LogRepository) GetLatestLocation(id string) *entities.Update {
 	filter := bson.M{
 		"robot_id": id,
 		"created_at": bson.M{
-			"$gte": time.Now().Add(-time.Second * 10),
+			"$gte": time.Now().Add(-time.Second * 3),
 		},
 	}
 

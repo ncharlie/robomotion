@@ -17,7 +17,7 @@ function nextPage() {
 }
 
 function getHistory(page, amount) {
-    fetch('/history?id=RB&p=' + page + '&a=' + amount, {
+    fetch('/history?id=r1&p=' + page + '&a=' + amount, {
         method: 'GET'
     }).then((response) => {
         if (response.ok) {
