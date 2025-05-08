@@ -148,8 +148,11 @@ void setup(void) {
     });
 
     server.on("/data", []() {
-        char buffer[50];
+        char buffer[100];
         sprintf(buffer, "{\"d\":\"%s\"}", rd);
+        // sprintf(buffer, "%s", rd);
+        // Serial.println(rd);
+        // Serial.println(buffer);
         server.send(200, "text/json", buffer);
     });
 
@@ -192,5 +195,6 @@ void loop(void) {
         String data = Serial2.readString();
         data.trim();
         rd = data;
+        // Serial.print(rd);
     }
 }

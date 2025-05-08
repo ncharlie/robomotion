@@ -7,31 +7,11 @@
 #include "speed.h"
 #include "ultrasonic.h"
 
-const int ROOM_LENGTH = 200;
+volatile int targetHeading = -1;
 
-int getY(int frontDist, int backDist) {
-    if (frontDist == -1 && backDist == -1)
-        return -1;
-    else {
-        if (frontDist != -1 && frontDist <= backDist)
-            return ROOM_LENGTH - frontDist;
-        else if (backDist != -1 && backDist <= frontDist)
-            return backDist;
-    }
-    return -1;
-}
+#define HEADING_THRESHOLD 25
+#define DISTANCE_THRESHOLD 30
 
-int getX(int leftDist, int rightDist) {
-    if (leftDist == -1 && rightDist == -1)
-        return -1;
-    else {
-        if (rightDist != -1 && rightDist <= leftDist)
-            return ROOM_LENGTH - rightDist;
-        else if (leftDist != -1 && leftDist <= rightDist)
-            return leftDist;
-    }
-    return -1;
-}
 int main() {
     init();
 
@@ -55,21 +35,39 @@ int main() {
     unsigned long lastUpdate1500ms = 0;  // last time the input pin was triggered
     unsigned long commandTrigger = 0;
 
-    int targetHeading = -1;
     int bearingAdjustPhase = 0;
     unsigned long lastBearingAdjust = 0;
     unsigned long lastBearingWait = 0;
     unsigned long bearingAdjustDelay = 0;
 
     Serial.begin(9600);
+    Serial.flush();
     Serial3.begin(115200);
 
     rover.setDirection(STOP);
     rover.setSpeed(2);
     delay(1000);
-    int x = -1, y = -1;
-
+    int dist[4] = {0, 0, 0, 0};
+    int uPos = 0;
     for (;;) {
+        int distance = ultrasonic.read(uPos);
+        // int y0 = ultrasonic.read(0);
+        // int y1 = ultrasonic.read(1);
+        // int x0 = ultrasonic.read(2);
+        // int x1 = ultrasonic.read(3);
+        // char uLog[100];
+        // sprintf(uLog, "Front: %d\tBack: %d\tLeft: %d\tRight: %d\n", y0, y1, x0, x1);
+        // Serial.print(uLog);
+        dist[uPos] = distance;
+        // Serial.println(dist[0]);
+
+        if ( 0 <= distance && distance <= DISTANCE_THRESHOLD ) rover.setDirection(STOP);
+        // if ( 0 <= y0 && y0 <= DISTANCE_THRESHOLD ) rover.setDirection(STOP);
+        // if ( 0 <= y1 && y1 <= DISTANCE_THRESHOLD ) rover.setDirection(STOP);
+        // if ( 0 <= x0 && x0 <= DISTANCE_THRESHOLD ) rover.setDirection(STOP);
+        // if ( 0 <= x1 && x1 <= DISTANCE_THRESHOLD ) rover.setDirection(STOP);
+
+        uPos = (uPos + 1)%4;
         now = millis();
         if (now - lastUpdate10ms >= 20) {  // run every 10 ms
             compass.update();
@@ -83,8 +81,8 @@ int main() {
         }
 
         if (now - lastUpdate1500ms >= 1500) {  // run every 1.5 second
-            char log[100];
-            // sprintf(log, "Heading: %d\tFront: %lu-%lu\tBack : %lu-%lu", compass.read(), rover.flSpd.getSpeed(), rover.frSpd.getSpeed(), rover.rlSpd.getSpeed(), rover.rrSpd.getSpeed());
+            // char log[100];
+            // sprintf(log, "Heading: %d\tFront: %lu-%lu\tBack : %lu-%lu\t", compass.read(), rover.flSpd.getSpeed(), rover.frSpd.getSpeed(), rover.rlSpd.getSpeed(), rover.rrSpd.getSpeed());
             // Serial.print(log);
 
             uint16_t fl = OCR4B;
@@ -92,39 +90,26 @@ int main() {
             uint16_t rl = OCR4C;
             uint16_t rr = OCR1B;
 
-            // sprintf(log, "Speed regis\tFront: %hu-%hu\n\t\tBack : %hu-%hu\n", fl, fr, rl, rr);
-            sprintf(log, "Speed regis\tFront: %hu-%hu\tBack : %hu-%hu\n", OCR4B, OCR1A, OCR4C, OCR1B);
+            // sprintf(log, "Speed regis\tFront: %hu-%hu\t\tBack : %hu-%hu\n", fl, fr, rl, rr);
+            // Serial.print(log);
+            // sprintf(log, "Speed regis\tFront: %hu-%hu\tBack : %hu-%hu\n", OCR4B, OCR1A, OCR4C, OCR1B);
             // Serial.print(log);
 
             int y0 = ultrasonic.read(0);
             int y1 = ultrasonic.read(1);
             int x0 = ultrasonic.read(2);
             int x1 = ultrasonic.read(3);
-            x = getX(x0, x1);
-            y = getY(y0, y1);
-            Serial.print(y0);
-            Serial.print(" ");
-            Serial.print(y1);
-            Serial.print(" ");
-            Serial.print(x0);
-            Serial.print(" ");
-            Serial.print(x1);
-            Serial.print(" ---> ");
-            Serial.print(x);
-            Serial.print(" ");
-            Serial.println(y);
-            if ( x != -1 || y != -1) {
-                char message[16];
-                // sprintf(message, "%lu,%d,%d,%d,%d\0", rover.frSpd.getSpeed(), compass.read(), false, x, y);
-                sprintf(message, "{\"r\":\"r1\",\"x\":%d,\"y\":%d,\"z\":0,\"s\":%lu,\"h\":%d}",
-                x, y, rover.frSpd.getSpeed(), compass.read());
-                Serial3.println(message);
-            }
-            if (x < 10 || x > 180 || 10 > y || y < 180) rover.setDirection(STOP);
-
+            
+            char message[32];
+            sprintf(message, "%lu,%d,", rover.frSpd.getSpeed(), compass.read(), dist[0], dist[1], dist[2], dist[3]);
+            // sprintf(message, "{\"r\":\"r1\",\"x\":%d,\"y\":%d,\"z\":0,\"s\":%lu,\"h\":%d}",
+            // x, y, rover.frSpd.getSpeed(), compass.read());
+            Serial.println(message);
+            Serial3.println(message);
+            
             // ultrasonic.read(0);
             // sprintf(log, "Front: %d\n", ultrasonic.read(0));
-            // sprintf(log, "Front: %d\tBack: %d\tLeft: %d\tRight: %d\n", ultrasonic.read(0), ultrasonic.read(1), ultrasonic.read(2), ultrasonic.read(3));
+            // sprintf(log, "Front: %d\tBack: %d\tLeft: %d\tRight: %d\n", y0, y1, x0, x1);
             // Serial.print(log);
 
             lastUpdate1500ms = millis();
@@ -132,6 +117,8 @@ int main() {
 
         bool ledOn = true;
 
+        // Serial.print("targetHeading: ");
+        // Serial.println(targetHeading);
         if (targetHeading != -1) {
             if (bearingAdjustPhase == 0) {  // Initial phase, not moving
                 int current = compass.read();
@@ -145,7 +132,7 @@ int main() {
                     int aDiff = abs(diff);
 
                     rover.setSpeed(2);
-                    if (aDiff < 25) {
+                    if (aDiff < HEADING_THRESHOLD) {
                         rover.setDirection(STOP);
                         Serial.println("-----SUCCESS----");
                         targetHeading = -1;
@@ -232,10 +219,11 @@ int main() {
             } else {
                 rover.setDirection(STOP);
             }
-        } else if (now - commandTrigger >= 2000) {
+        } else if (now - commandTrigger >= 10000) {
             rover.setDirection(STOP);
         }
 
+        Serial.flush();
         ledOn ? led.On() : led.Off();
     }
 

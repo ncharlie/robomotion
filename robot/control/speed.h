@@ -5,9 +5,6 @@
 
 #define MAX_POWER 1024
 
-#define P(e) e * 0.01         // Kp
-#define I(sum) sum * 0.004    // Ki
-#define D(diff) diff * 0.002  // Kd
 
 class Speed {
    private:
@@ -18,10 +15,13 @@ class Speed {
     int prevError;
     int* base;
 
+    double kp;
+    double ki;
+    double kd;
    public:
     unsigned long countSinceLast;
 
-    Speed(int* baseSpeed) : base(baseSpeed) {
+    Speed(int* baseSpeed, double p, double i, double d) : base(baseSpeed), kp(p), ki(i), kd(d) {
         // 64 * 12 = 768 per 1 round (314 mm)
         // 3. Pin 18 INT3 <--- front-right
         // 2. Pin 19 INT2 <--- rear-right
@@ -71,9 +71,9 @@ class Speed {
         int error = tSpd - encoderRPM;
         sumError += error;
 
-        int p = P(error);
-        int i = I(sumError);
-        int d = D((error - prevError));
+        int p = error * kp;
+        int i = sumError * ki;
+        int d = (error - prevError) * kd;
         prevError = error;
 
         // char message[100];

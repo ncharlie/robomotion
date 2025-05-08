@@ -38,7 +38,11 @@ class Motion {
     Speed rlSpd;
 
    public:
-    Motion() : targetSpeed(0), frSpd(frBase), rrSpd(rrBase), flSpd(flBase), rlSpd(rlBase) {
+    Motion() : targetSpeed(0), 
+    frSpd(frBase, 0.01, 0.004, 0.004), 
+    rrSpd(rrBase, 0.01, 0.004, 0.004), 
+    flSpd(flBase, 0.01, 0.004, 0.004), 
+    rlSpd(rlBase, 0.01, 0.004, 0.004) {
         // -------------- DIRECTION ------------------
         // 30 (PC7), 31 (PC6) <--- front-right
         // 32 (PC5), 33 (PC4) <--- rear-right
@@ -116,10 +120,10 @@ class Motion {
         flSpd.reset();
         rlSpd.reset();
 
-        OCR1A = (unsigned long)frBase[level];
-        OCR1B = (unsigned long)rrBase[level];
-        OCR4B = (unsigned long)flBase[level];
-        OCR4C = (unsigned long)rlBase[level];
+        // OCR1A = (unsigned long)frBase[level];
+        // OCR1B = (unsigned long)rrBase[level];
+        // OCR4B = (unsigned long)flBase[level];
+        // OCR4C = (unsigned long)rlBase[level];
     }
 
     void controlSpeed() {
